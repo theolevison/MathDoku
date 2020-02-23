@@ -7,9 +7,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.*;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
@@ -71,31 +73,6 @@ public class MathDoku extends Application {
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
 
-
-        /*
-        class CalculationHandler implements EventHandler<ActionEvent> {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                Double answer = Double.parseDouble(xField.getText());
-                //TODO convert individual values to values stored in an array, then maybe use case switch, either way it will improve maintainability
-                if (mathsFunctions.getValue().equals("x*x")){
-                    answer = answer*answer;
-                } else if (mathsFunctions.getValue().equals("sin(x)")){
-                    answer = Math.sin(answer);
-                } else if (mathsFunctions.getValue().equals("cos(x)")){
-                    answer = Math.cos(answer);
-                } else if (mathsFunctions.getValue().equals("Fibonacci(x)")){
-                    //TODO make fibonacci sequence
-                }
-                equalsField.setText(String.valueOf(answer));
-            }
-        }
-
-        mathsFunctions.setOnAction(new CalculationHandler());
-        */
-
-
         //10*10 box for mathduko atm
         int nDimension = 10;
         
@@ -115,14 +92,13 @@ public class MathDoku extends Application {
         root.add(buttonVBox, 2, 0, 1, 1);
 
 
-        Scene scene = new Scene(root,700,700);
+        Scene scene = new Scene(root,950,700);
         stage.setScene(scene);
         stage.setTitle("MathDoku");
 
         stage.show();
     }
 
-    //TODO: I would prefer a general node class than I can add to the grid which contains the canvas node etc
     private VBox[] generateSquares(int n) {
         VBox[] listOfVBoxes = new VBox[n];
         for (int i = 0; i < n; i++) {
@@ -149,6 +125,9 @@ public class MathDoku extends Application {
                 stack.getChildren().addAll(canvas, mainNumber, targetNumber);
                 stack.setAlignment(Pos.CENTER);
                 StackPane.setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
+                
+                stack.addEventHandler(MouseEvent.MOUSE_CLICKED, new GridMouseClickHandler(stack));
+                
                 vBox.getChildren().add(stack);
             }
 
@@ -159,5 +138,25 @@ public class MathDoku extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+}
+
+class GridMouseClickHandler implements EventHandler<MouseEvent> {
+    StackPane stack;
+
+    public GridMouseClickHandler(StackPane stack) {
+        this.stack = stack;
+    }
+
+    @Override
+    public void handle(MouseEvent arg0) {
+
+        Node node = stack.getChildren().get(1);
+        if (node instanceof Label){
+            Label mainNumber = (Label) node;
+            mainNumber.setText("4");
+            //now start listening for keypresses
+        }
+
     }
 }
