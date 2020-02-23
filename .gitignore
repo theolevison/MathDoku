@@ -3,6 +3,6 @@ bin/
 .project
 .settings
 .vscode
-App.java
-FunctionCalculator.java
-HelloFX.java
+src/app/App.java
+src/app/FunctionCalculator.java
+src/app/HelloFX.java
