@@ -1,20 +1,12 @@
 package app;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.*;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 
 public class MathDoku extends Application {
     //use mathDukoController to store everything like prevStacks, dimensions etc
@@ -22,6 +14,9 @@ public class MathDoku extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        mathDokuController.setDimensions(60);
+
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
         root.setHgap(10);
@@ -102,7 +97,7 @@ public class MathDoku extends Application {
         stage.show();
     }
 
-
+    
     private VBox[] generateSquares(int n) {
 
         VBox[] listOfVBoxes = new VBox[n];
@@ -113,82 +108,11 @@ public class MathDoku extends Application {
 
             for (int j = 0; j < n; j++) {
 
-                //TODO: move this into a separate class so I can instantiate a new cell whenever I want
-                int dimensions = 60;
-                //setup the canvas for drawing
-                Canvas canvas = new Canvas(dimensions, dimensions);
-                GraphicsContext gc = canvas.getGraphicsContext2D();    
-                Rectangle rect = new Rectangle(0,0,dimensions,dimensions);
-                //rect.setStroke(Color.BLACK);
-                rect.setFill(Color.TRANSPARENT);
-                gc.strokeRect(0, 0, dimensions, dimensions);
+                    
 
-                //setup main number label and targetNumber
-                Label mainNumber = new Label("2");
-                mainNumber.setFont(new Font("Arial", dimensions / 2));
-                mainNumber.setStyle("-fx-font-weight: bold");
-                Label targetNumber = new Label("12+");
-                targetNumber.setFont(new Font("Arial", dimensions / 8));
-
-                //add all nodes to the stack
-                StackPane stack = new StackPane();
-                stack.getChildren().addAll(canvas, mainNumber, targetNumber, rect);
-                stack.setAlignment(Pos.CENTER);
-                StackPane.setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
-                
-
-                class GridMouseClickHandler implements EventHandler<MouseEvent> {
-            
-                    public GridMouseClickHandler() {
-                    }
-                
-                    @Override
-                    public void handle(MouseEvent arg0) {
-                        //TODO: now start listening for keypresses and react to them
-                        //hand existing class target node to change or some other way
-                        //have a think about it
-                
-                        Node labelNode = stack.getChildren().get(1);
-                        if (labelNode instanceof Label){
-                            Label mainNumber = (Label) labelNode;
-                            mainNumber.setText("4");
-                        }
-                
-                        //Unhighlight previous cell
-                        try {
-                            Node prevNode = mathDokuController.getPrevStack().getChildren().get(3);
-                            if (prevNode instanceof Rectangle){
-                                Rectangle rect = (Rectangle) prevNode;
-                                rect.setStroke(Color.TRANSPARENT);
-                            }
-                        } catch (NullPointerException e) {
-                            System.out.println("No previous moves so cant unhighlight cell");
-                        }
+                vBox.getChildren().add(new MathDokuCell(mathDokuController));
                 
                 
-                        //TODO: decide if I want to use Canvas or Rectangle. Canvas is more flexible, but harder to change colour etc
-                
-                        //Highlight the currently selected node by redrawing
-                        Node canvasNode = stack.getChildren().get(0);
-                        if (canvasNode instanceof Canvas){
-                            Canvas canvas = (Canvas) canvasNode;
-                            canvas.getGraphicsContext2D().setStroke(Color.YELLOW);
-                        }
-                
-                        //Highlight the currently selected node by changinc colour of rect
-                        Node rectNode = stack.getChildren().get(3);
-                        if (rectNode instanceof Rectangle){
-                            Rectangle rect = (Rectangle) rectNode;
-                            rect.setStroke(Color.YELLOW);
-                            //save stack for unhighlighting next time
-                            mathDokuController.setPrevStack(stack);
-                        }
-                    }
-                }
-
-                stack.addEventHandler(MouseEvent.MOUSE_CLICKED, new GridMouseClickHandler());
-                
-                vBox.getChildren().add(stack);
             }
 
             listOfVBoxes[i] = vBox;

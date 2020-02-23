@@ -3,14 +3,22 @@ package app;
 import javafx.scene.layout.StackPane;
 
 public class MathDokuController {
-    //TODO: wo are going to have to store last modified node anyway for undo/redo. So pass in prevNode here
     private StackPane prevStack;
+    private int dimensions;
 
-    public void setPrevStack(StackPane stack) {
-        prevStack = stack;
+    public int getDimensions() {
+        return this.dimensions;
+    }
+
+    public void setDimensions(int dimensions) {
+        this.dimensions = dimensions;
     }
 
     public StackPane getPrevStack() {
         return prevStack;
+    }
+
+    public void setPrevStack(StackPane stack) {
+        prevStack = stack;
     }
 }
