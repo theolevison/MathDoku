@@ -13,6 +13,8 @@ import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class MathDoku extends Application {
@@ -111,6 +113,9 @@ public class MathDoku extends Application {
                 //setup the canvas for drawing
                 Canvas canvas = new Canvas(dimensions, dimensions);
                 GraphicsContext gc = canvas.getGraphicsContext2D();    
+                Rectangle rect = new Rectangle(0,0,dimensions,dimensions);
+                //rect.setStroke(Color.BLACK);
+                rect.setFill(Color.TRANSPARENT);
                 gc.strokeRect(0, 0, dimensions, dimensions);
 
                 //setup main number label and targetNumber
@@ -122,7 +127,7 @@ public class MathDoku extends Application {
 
                 //add all nodes to the stack
                 StackPane stack = new StackPane();
-                stack.getChildren().addAll(canvas, mainNumber, targetNumber);
+                stack.getChildren().addAll(canvas, mainNumber, targetNumber, rect);
                 stack.setAlignment(Pos.CENTER);
                 StackPane.setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
                 
@@ -150,12 +155,31 @@ class GridMouseClickHandler implements EventHandler<MouseEvent> {
 
     @Override
     public void handle(MouseEvent arg0) {
+        //TODO: now start listening for keypresses and react to them
+        //hand existing class target node to change or some other way
+        //have a think about it
 
-        Node node = stack.getChildren().get(1);
-        if (node instanceof Label){
-            Label mainNumber = (Label) node;
+        Node labelNode = stack.getChildren().get(1);
+        if (labelNode instanceof Label){
+            Label mainNumber = (Label) labelNode;
             mainNumber.setText("4");
-            //now start listening for keypresses
+            
+        }
+
+        //TODO: decide if I want to use Canvas or Rectangle. Canvas is more flexible, but harder to change colour etc
+
+        //Highlight the currently selected node by redrawing
+        Node canvasNode = stack.getChildren().get(0);
+        if (canvasNode instanceof Canvas){
+            Canvas canvas = (Canvas) canvasNode;
+            canvas.getGraphicsContext2D().setStroke(Color.YELLOW);
+        }
+
+        //Highlight the currently selected node by changinc colour of rect
+        Node rectNode = stack.getChildren().get(3);
+        if (rectNode instanceof Rectangle){
+            Rectangle rect = (Rectangle) rectNode;
+            rect.setStroke(Color.YELLOW);
         }
 
     }
