@@ -14,9 +14,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class MathDokuCell extends StackPane{
+    //TODO: I think im going to have to store the cells position as attributes
+    private String number = "";
+    private int x;
+    private int y;
 
-    public MathDokuCell(MathDokuController mathDokuController){
-        int dimensions = mathDokuController.getDimensions();
+    public MathDokuCell(MathDokuModel mathDokuModel){
+        int dimensions = mathDokuModel.getDimensions();
 
         //setup the canvas for drawing
         Canvas canvas = new Canvas(dimensions, dimensions);
@@ -27,9 +31,10 @@ public class MathDokuCell extends StackPane{
         gc.strokeRect(0, 0, dimensions, dimensions);
 
         //setup main number label and targetNumber
-        Label mainNumber = new Label("2");
+        Label mainNumber = new Label(number);
         mainNumber.setFont(new Font("Arial", dimensions / 2));
         mainNumber.setStyle("-fx-font-weight: bold");
+        mainNumber.setMaxWidth(dimensions);
         Label targetNumber = new Label("12+");
         targetNumber.setFont(new Font("Arial", dimensions / 8));
 
@@ -40,25 +45,15 @@ public class MathDokuCell extends StackPane{
         
 
         class GridMouseClickHandler implements EventHandler<MouseEvent> {
-
-            public GridMouseClickHandler() {
-            }
         
             @Override
             public void handle(MouseEvent arg0) {
-                //TODO: now start listening for keypresses and react to them
-                //hand existing class target node to change or some other way
-                //have a think about it
-        
-                Node labelNode = getChildren().get(1);
-                if (labelNode instanceof Label){
-                    Label mainNumber = (Label) labelNode;
-                    mainNumber.setText("4");
-                }
+                
+                mathDokuModel.setCurrentStack(MathDokuCell.this);
         
                 //Unhighlight previous cell
                 try {
-                    Node prevNode = mathDokuController.getPrevStack().getChildren().get(3);
+                    Node prevNode = mathDokuModel.getPrevStack().getChildren().get(3);
                     if (prevNode instanceof Rectangle){
                         Rectangle rect = (Rectangle) prevNode;
                         rect.setStroke(Color.TRANSPARENT);
@@ -83,12 +78,15 @@ public class MathDokuCell extends StackPane{
                     Rectangle rect = (Rectangle) rectNode;
                     rect.setStroke(Color.YELLOW);
                     //save stack for unhighlighting next time
-                    mathDokuController.setPrevStack(MathDokuCell.this);
+                    mathDokuModel.setPrevStack(MathDokuCell.this);
                 }
             }
         }
 
         addEventHandler(MouseEvent.MOUSE_CLICKED, new GridMouseClickHandler());
-    
+    }
+
+    public void updateNumber(String number) {
+        
     }
 }

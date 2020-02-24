@@ -1,21 +1,26 @@
 package app;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class MathDoku extends Application {
     //use mathDukoController to store everything like prevStacks, dimensions etc
-    private MathDokuController mathDokuController = new MathDokuController();
+    private MathDokuModel mathDokuModel = new MathDokuModel();
 
     @Override
     public void start(Stage stage) {
 
-        mathDokuController.setDimensions(60);
+        mathDokuModel.setDimensions(60);
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -85,6 +90,36 @@ public class MathDoku extends Application {
             gridHBox.getChildren().add(vboxArray[i]);
         }
 
+        class TypeEventHandler implements EventHandler<KeyEvent> {
+
+            @Override
+            public void handle(KeyEvent arg0) {
+                if (mathDokuModel.getCurrentStack()!=null){
+                    String str = arg0.getCharacter();
+
+                    try {
+                        Integer.parseInt(str);
+                        //Make sure it is an integer
+                        //Input is a number, so concatenate it with the array in mathDokuModel
+                        //mathDokuModel.getCurrentStack();
+                        Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
+            
+                        if (labelNode instanceof Label){
+                            Label mainNumber = (Label) labelNode;
+                            
+                            mainNumber.setText(mainNumber.getText()+str);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Someone tried to type a letter what a fool");
+                    }
+
+                    //TODO: handle events like delete
+                }
+            }
+        } 
+
+        root.setOnKeyTyped(new TypeEventHandler());;
+
         //add grid and buttons to GridPane
         root.add(gridHBox, 0, 0, 1, 1);
         root.add(buttonVBox, 2, 0, 1, 1);
@@ -107,12 +142,7 @@ public class MathDoku extends Application {
             vBox.setSpacing(0);
 
             for (int j = 0; j < n; j++) {
-
-                    
-
-                vBox.getChildren().add(new MathDokuCell(mathDokuController));
-                
-                
+                vBox.getChildren().add(new MathDokuCell(mathDokuModel));
             }
 
             listOfVBoxes[i] = vBox;
