@@ -19,8 +19,8 @@ public class MathDokuCell extends StackPane{
     private int x;
     private int y;
 
-    public MathDokuCell(MathDokuModel mathDokuModel){
-        int dimensions = mathDokuModel.getDimensions();
+    public MathDokuCell(MathDokuModel mathDokuController){
+        int dimensions = mathDokuController.getDimensions();
 
         //setup the canvas for drawing
         Canvas canvas = new Canvas(dimensions, dimensions);
@@ -49,11 +49,11 @@ public class MathDokuCell extends StackPane{
             @Override
             public void handle(MouseEvent arg0) {
                 
-                mathDokuModel.setCurrentStack(MathDokuCell.this);
+                mathDokuController.setCurrentStack(MathDokuCell.this);
         
                 //Unhighlight previous cell
                 try {
-                    Node prevNode = mathDokuModel.getPrevStack().getChildren().get(3);
+                    Node prevNode = mathDokuController.getPrevStack().getChildren().get(3);
                     if (prevNode instanceof Rectangle){
                         Rectangle rect = (Rectangle) prevNode;
                         rect.setStroke(Color.TRANSPARENT);
@@ -78,7 +78,7 @@ public class MathDokuCell extends StackPane{
                     Rectangle rect = (Rectangle) rectNode;
                     rect.setStroke(Color.YELLOW);
                     //save stack for unhighlighting next time
-                    mathDokuModel.setPrevStack(MathDokuCell.this);
+                    mathDokuController.setPrevStack(MathDokuCell.this);
                 }
             }
         }

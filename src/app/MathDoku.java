@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -21,6 +22,10 @@ public class MathDoku extends Application {
     public void start(Stage stage) {
 
         mathDokuModel.setDimensions(60);
+
+        //TODO: move to model and use getters/setters. Or dont. You do you brudddaaaaa
+        //10*10 box for mathduko atm
+        int nDimension = 10;
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -75,9 +80,6 @@ public class MathDoku extends Application {
         buttonVBox.getChildren().addAll(undoRedoHBox, loadOptionsHBox, clearHBox, showMistakesHBox);
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
-
-        //10*10 box for mathduko atm
-        int nDimension = 10;
         
         //button box
         HBox gridHBox = new HBox();
@@ -90,35 +92,55 @@ public class MathDoku extends Application {
             gridHBox.getChildren().add(vboxArray[i]);
         }
 
+        //TODO: move this into a separate class and pass in references to stuff if you want. Idk if thats better design or not :)
         class TypeEventHandler implements EventHandler<KeyEvent> {
 
             @Override
             public void handle(KeyEvent arg0) {
                 if (mathDokuModel.getCurrentStack()!=null){
-                    String str = arg0.getCharacter();
+                    String input = arg0.getText();
+
+                    Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
 
                     try {
-                        Integer.parseInt(str);
+                        Integer.parseInt(input);
                         //Make sure it is an integer
                         //Input is a number, so concatenate it with the array in mathDokuModel
                         //mathDokuModel.getCurrentStack();
-                        Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
-            
                         if (labelNode instanceof Label){
                             Label mainNumber = (Label) labelNode;
                             
-                            mainNumber.setText(mainNumber.getText()+str);
+                            //prevent the user inputting a number greater than the highest possible
+                            String newNumber = mainNumber.getText()+input;
+                            if (Integer.parseInt(newNumber) <= nDimension){
+                                mainNumber.setText(newNumber);
+                            }
                         }
                     } catch (NumberFormatException e) {
                         System.out.println("Someone tried to type a letter what a fool");
                     }
-
-                    //TODO: handle events like delete
+                    
+                    //If delete, delete the last number in the cell
+                    //TODO: make this more elegant
+                    if (arg0.getCode() == KeyCode.BACK_SPACE){
+                        if (labelNode instanceof Label){
+                            Label mainNumber = (Label) labelNode;
+                            String existingNumber = mainNumber.getText();
+                            if (existingNumber.length() > 0){
+                                String[] numberArray = existingNumber.split("");
+                                String concat = "";
+                                for (int i = 0; i < numberArray.length-1; i++) {
+                                    concat += numberArray[i];
+                                }
+                                mainNumber.setText(concat);
+                            }
+                        }
+                    }
                 }
             }
         } 
 
-        root.setOnKeyTyped(new TypeEventHandler());;
+        root.setOnKeyPressed(new TypeEventHandler());
 
         //add grid and buttons to GridPane
         root.add(gridHBox, 0, 0, 1, 1);
@@ -132,7 +154,6 @@ public class MathDoku extends Application {
         stage.show();
     }
 
-    
     private VBox[] generateSquares(int n) {
 
         VBox[] listOfVBoxes = new VBox[n];
