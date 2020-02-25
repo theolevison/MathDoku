@@ -1,0 +1,51 @@
+package app;
+
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
+public class MathDokuCanvas extends Canvas {
+
+    public MathDokuCanvas(MathDokuModel mathDokuController){
+        int dimensions = mathDokuController.getCellDimensions();
+
+        //setup the canvas for drawing
+        //Canvas canvas = new Canvas(dimensions, dimensions);
+        GraphicsContext gc = getGraphicsContext2D();    
+
+        gc.strokeRect(0, 0, dimensions, dimensions);
+
+        widthProperty().addListener(evt -> draw());
+        heightProperty().addListener(evt -> draw());
+    }
+
+
+    @Override
+    public boolean isResizable() {
+      return true;
+    }
+ 
+    @Override
+    public double prefWidth(double height) {
+      return getWidth();
+    }
+ 
+    @Override
+    public double prefHeight(double width) {
+      return getHeight();
+    }
+    
+
+    private void draw() {
+        double width = getWidth();
+        double height = getHeight();
+   
+        GraphicsContext gc = getGraphicsContext2D();
+        gc.clearRect(0, 0, width, height);
+   
+        gc.setStroke(Color.RED);
+        gc.strokeLine(0, 0, width, height);
+        gc.strokeLine(0, height, width, 0);
+    }
+   
+}

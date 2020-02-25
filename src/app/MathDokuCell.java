@@ -14,24 +14,40 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class MathDokuCell extends StackPane{
-    //TODO: I think im going to have to store the cells position as attributes
     private String number = "";
-    private int x;
-    private int y;
+    private Rectangle rect;
+    private Label mainNumber;
+    private MathDokuModel mathDokuController;
+
+    public String getNumber() {
+        return number;
+    }
 
     public MathDokuCell(MathDokuModel mathDokuController){
-        int dimensions = mathDokuController.getDimensions();
+        this.mathDokuController = mathDokuController;
+        int dimensions = mathDokuController.getCellDimensions();
 
         //setup the canvas for drawing
         Canvas canvas = new Canvas(dimensions, dimensions);
         GraphicsContext gc = canvas.getGraphicsContext2D();    
-        Rectangle rect = new Rectangle(0,0,dimensions,dimensions);
+        rect = new Rectangle(0,0,dimensions,dimensions);
         //rect.setStroke(Color.BLACK);
         rect.setFill(Color.TRANSPARENT);
         gc.strokeRect(0, 0, dimensions, dimensions);
 
+        /*
+        //do resizable canvas
+        //TODO: change panes so that canvas can actually resize as the window does. I think after that it should work
+        MathDokuCanvas mathDokuCanvas = new MathDokuCanvas(mathDokuController);
+        getChildren().add(mathDokuCanvas);
+ 
+        // Bind canvas size to stack pane size.
+        mathDokuCanvas.widthProperty().bind(MathDokuCell.this.widthProperty());
+        mathDokuCanvas.heightProperty().bind(MathDokuCell.this.heightProperty());
+        */
+
         //setup main number label and targetNumber
-        Label mainNumber = new Label(number);
+        mainNumber = new Label(number);
         mainNumber.setFont(new Font("Arial", dimensions / 2));
         mainNumber.setStyle("-fx-font-weight: bold");
         mainNumber.setMaxWidth(dimensions);
@@ -43,7 +59,7 @@ public class MathDokuCell extends StackPane{
         setAlignment(Pos.CENTER);
         setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
         
-
+        //TODO: you dont need any of the casting to rectangle etc because its all within scope you silly man, fix this!
         class GridMouseClickHandler implements EventHandler<MouseEvent> {
         
             @Override
@@ -86,7 +102,39 @@ public class MathDokuCell extends StackPane{
         addEventHandler(MouseEvent.MOUSE_CLICKED, new GridMouseClickHandler());
     }
 
-    public void updateNumber(String number) {
+    public void updateNumber(String input) {
+    
+        try {
+            //Make sure it is an integer
+            Integer.parseInt(input);
+            
+            //Input is a number, so concatenate it with the existing number
+            //prevent the user inputting a number greater than the highest possible
+            String newNumber = number+input;
+            if (Integer.parseInt(newNumber) <= mathDokuController.getGridDimensions()){
+                mainNumber.setText(newNumber);
+                number = newNumber;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Someone tried to type a letter what a fool");
+        }
         
+        //If delete, delete the last number in the cell
+        //TODO: can I make this more elegant?
+        if (input.equals("delete")){
+            if (number.length() > 0){
+                String[] numberArray = number.split("");
+                String concat = "";
+                for (int i = 0; i < numberArray.length-1; i++) {
+                    concat += numberArray[i];
+                }
+                mainNumber.setText(concat);
+                number = concat;
+            }
+        }
+    }
+
+    public void highlight(Color color) {
+        rect.setStroke(color);
     }
 }

@@ -7,14 +7,11 @@ import javafx.event.EventTarget;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 public class MathDoku extends Application {
     //use mathDukoController to store everything like prevStacks, dimensions etc
@@ -23,11 +20,13 @@ public class MathDoku extends Application {
     @Override
     public void start(Stage stage) {
 
-        mathDokuModel.setDimensions(60);
+        //10*10 box for mathduko atm
+        int gridDimensions = 3;
+        mathDokuModel.setCellDimensions(60);
+        mathDokuModel.setGridDimensions(gridDimensions);
 
         //TODO: move to model and use getters/setters. Or dont. You do you brudddaaaaa
-        //10*10 box for mathduko atm
-        int nDimension = 9;
+        
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -88,22 +87,17 @@ public class MathDoku extends Application {
             @Override
             public void handle(ActionEvent arg0) {
                 if (mathDokuModel.getCurrentStack()!=null){
-                    Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
                     EventTarget target = arg0.getTarget();
 
                     //get the text from the button
+                    //TODO: try to git rid of casting please, maybe put numberButtons in its own class
                     if (target instanceof Button){
                         Button button = (Button) arg0.getTarget();
+                        mathDokuModel.getCurrentStack().updateNumber(button.getText());
                         
-                        String input = button.getText();
-                        if (labelNode instanceof Label){
-                            Label mainNumber = (Label) labelNode;
-                            
-                            //prevent the user inputting a number greater than the highest possible
-                            String newNumber = mainNumber.getText()+input;
-                            if (Integer.parseInt(newNumber) <= nDimension){
-                                mainNumber.setText(newNumber);
-                            }
+                        //TODO: check if the show errors button is toggled
+                        if (true) {
+                            mathDokuModel.checkColumnns();
                         }
                     }
                 }
@@ -114,14 +108,15 @@ public class MathDoku extends Application {
         VBox numberButtonsVBox = new VBox();
         numberButtonsVBox.setAlignment(Pos.CENTER);
         numberButtonsVBox.setSpacing(10);
-        for (int i = 1; i < 10; i++) {
+        //ensure that only number buttons appear that are valid for the gridDimensions
+        for (int i = 1; i < 10 && i <= gridDimensions; i++) {
             Button button = new Button(Integer.toString(i));
             button.setMaxWidth(Double.MAX_VALUE);
             button.setMaxHeight(Double.MAX_VALUE);
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
-        if (nDimension > 9){
+        if (gridDimensions > 9){
             Button button = new Button("0");
             button.setMaxWidth(Double.MAX_VALUE);
             button.setMaxHeight(Double.MAX_VALUE);
@@ -135,55 +130,27 @@ public class MathDoku extends Application {
         gridHBox.setSpacing(0);
 
         //generate VBoxes and fill out the HBox with them
-        VBox[] vboxArray = generateSquares(nDimension);
+        VBox[] vboxArray = generateSquares(gridDimensions);
         for (int i = 0; i < vboxArray.length; i++) {
             gridHBox.getChildren().add(vboxArray[i]);
         }
 
-        //TODO: move this into a separate class and pass in references to stuff if you want. Idk if thats better design or not :)
         //TODO: allow the user to use arow keys to switch cells (longterm)
         class KeyboardInputEventHandler implements EventHandler<KeyEvent> {
 
             @Override
             public void handle(KeyEvent arg0) {
                 if (mathDokuModel.getCurrentStack()!=null){
-                    String input = arg0.getText();
-
-                    Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
-
-                    try {
-                        Integer.parseInt(input);
-                        //Make sure it is an integer
-                        //Input is a number, so concatenate it with the array in mathDokuModel
-                        //mathDokuModel.getCurrentStack();
-                        if (labelNode instanceof Label){
-                            Label mainNumber = (Label) labelNode;
-                            
-                            //prevent the user inputting a number greater than the highest possible
-                            String newNumber = mainNumber.getText()+input;
-                            if (Integer.parseInt(newNumber) <= nDimension){
-                                mainNumber.setText(newNumber);
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Someone tried to type a letter what a fool");
+                    //mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
+                    if (arg0.getCode() == KeyCode.BACK_SPACE) {
+                        mathDokuModel.getCurrentStack().updateNumber("delete");
+                    } else {
+                        mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
                     }
                     
-                    //If delete, delete the last number in the cell
-                    //TODO: make this more elegant
-                    if (arg0.getCode() == KeyCode.BACK_SPACE){
-                        if (labelNode instanceof Label){
-                            Label mainNumber = (Label) labelNode;
-                            String existingNumber = mainNumber.getText();
-                            if (existingNumber.length() > 0){
-                                String[] numberArray = existingNumber.split("");
-                                String concat = "";
-                                for (int i = 0; i < numberArray.length-1; i++) {
-                                    concat += numberArray[i];
-                                }
-                                mainNumber.setText(concat);
-                            }
-                        }
+                    //TODO: check if the show errors button is toggled
+                    if (true) {
+                        mathDokuModel.checkColumnns();
                     }
                 }
             }
@@ -213,7 +180,9 @@ public class MathDoku extends Application {
             vBox.setSpacing(0);
 
             for (int j = 0; j < n; j++) {
-                vBox.getChildren().add(new MathDokuCell(mathDokuModel));
+                MathDokuCell cell = new MathDokuCell(mathDokuModel);
+                vBox.getChildren().add(cell);
+                mathDokuModel.addCell(cell, i, j);
             }
 
             listOfVBoxes[i] = vBox;
