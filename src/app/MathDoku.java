@@ -1,7 +1,9 @@
 package app;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
@@ -25,7 +27,7 @@ public class MathDoku extends Application {
 
         //TODO: move to model and use getters/setters. Or dont. You do you brudddaaaaa
         //10*10 box for mathduko atm
-        int nDimension = 10;
+        int nDimension = 9;
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -80,8 +82,54 @@ public class MathDoku extends Application {
         buttonVBox.getChildren().addAll(undoRedoHBox, loadOptionsHBox, clearHBox, showMistakesHBox);
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
+
+        class NumberButtonEventHandler implements EventHandler<ActionEvent> {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                if (mathDokuModel.getCurrentStack()!=null){
+                    Node labelNode = mathDokuModel.getCurrentStack().getChildren().get(1);
+                    EventTarget target = arg0.getTarget();
+
+                    //get the text from the button
+                    if (target instanceof Button){
+                        Button button = (Button) arg0.getTarget();
+                        
+                        String input = button.getText();
+                        if (labelNode instanceof Label){
+                            Label mainNumber = (Label) labelNode;
+                            
+                            //prevent the user inputting a number greater than the highest possible
+                            String newNumber = mainNumber.getText()+input;
+                            if (Integer.parseInt(newNumber) <= nDimension){
+                                mainNumber.setText(newNumber);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
-        //button box
+        //generate number buttons
+        VBox numberButtonsVBox = new VBox();
+        numberButtonsVBox.setAlignment(Pos.CENTER);
+        numberButtonsVBox.setSpacing(10);
+        for (int i = 1; i < 10; i++) {
+            Button button = new Button(Integer.toString(i));
+            button.setMaxWidth(Double.MAX_VALUE);
+            button.setMaxHeight(Double.MAX_VALUE);
+            button.setOnAction(new NumberButtonEventHandler());
+            numberButtonsVBox.getChildren().add(button);
+        }
+        if (nDimension > 9){
+            Button button = new Button("0");
+            button.setMaxWidth(Double.MAX_VALUE);
+            button.setMaxHeight(Double.MAX_VALUE);
+            button.setOnAction(new NumberButtonEventHandler());
+            numberButtonsVBox.getChildren().add(button);
+        }
+
+        //grid box
         HBox gridHBox = new HBox();
         gridHBox.setAlignment(Pos.CENTER);
         gridHBox.setSpacing(0);
@@ -93,7 +141,8 @@ public class MathDoku extends Application {
         }
 
         //TODO: move this into a separate class and pass in references to stuff if you want. Idk if thats better design or not :)
-        class TypeEventHandler implements EventHandler<KeyEvent> {
+        //TODO: allow the user to use arow keys to switch cells (longterm)
+        class KeyboardInputEventHandler implements EventHandler<KeyEvent> {
 
             @Override
             public void handle(KeyEvent arg0) {
@@ -140,11 +189,12 @@ public class MathDoku extends Application {
             }
         } 
 
-        root.setOnKeyPressed(new TypeEventHandler());
+        root.setOnKeyPressed(new KeyboardInputEventHandler());
 
         //add grid and buttons to GridPane
-        root.add(gridHBox, 0, 0, 1, 1);
-        root.add(buttonVBox, 2, 0, 1, 1);
+        root.add(numberButtonsVBox, 0, 0, 1, 1);
+        root.add(gridHBox, 2, 0, 1, 1);
+        root.add(buttonVBox, 4, 0, 1, 1);
 
 
         Scene scene = new Scene(root,950,700);
