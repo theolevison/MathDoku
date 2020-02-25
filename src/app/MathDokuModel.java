@@ -11,7 +11,7 @@ public class MathDokuModel {
     private MathDokuCell currentStack;
     private int cellDimensions;
     private int gridDimensions;
-    private MathDokuCell[][] grid;;
+    private MathDokuCell[][] grid;
 
     public int getGridDimensions() {
         return this.gridDimensions;
@@ -38,7 +38,7 @@ public class MathDokuModel {
         this.cellDimensions = cellDimensions;
     }
 
-    public StackPane getPrevStack() {
+    public MathDokuCell getPrevStack() {
         return prevStack;
     }
 
@@ -55,8 +55,13 @@ public class MathDokuModel {
         grid[x][y] = cell;
     }
 
+    public void check(){
+        checkColumnns();
+        checkRows();
+    }
+
     //check for rule breaking in the columns
-    public void checkColumnns() {
+    private void checkColumnns() {
         for (MathDokuCell[] mathDokuColumn : grid) {
             Set<Integer> set = new HashSet<Integer>();
             for (int i = 0; i < mathDokuColumn.length; i++) {
@@ -71,7 +76,12 @@ public class MathDokuModel {
                         }
                         //only need to find the first conflict to highlight it, so move to the next column
                         break;
-                    }
+                    } else {
+                        //if everything is correct unhighlight
+                        for (MathDokuCell cell : mathDokuColumn) {
+                            cell.highlight(Color.TRANSPARENT);
+                        }
+                    }  
                 } catch (NumberFormatException e) {
                     System.out.println("Not all cells filled in so error thrown and caught");
                 }

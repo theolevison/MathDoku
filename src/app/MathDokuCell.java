@@ -3,7 +3,6 @@ package app;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
@@ -17,15 +16,24 @@ public class MathDokuCell extends StackPane{
     private String number = "";
     private Rectangle rect;
     private Label mainNumber;
-    private MathDokuModel mathDokuController;
+    private MathDokuModel mathDokuModel;
+    private Color defaultColor;
 
-    public String getNumber() {
+    public String getNumber(){
         return number;
     }
 
-    public MathDokuCell(MathDokuModel mathDokuController){
-        this.mathDokuController = mathDokuController;
-        int dimensions = mathDokuController.getCellDimensions();
+    private void setNumber(String newNumber){
+        number = newNumber;
+        //TODO: check if the show errors button is toggled
+        if (true) {
+            mathDokuModel.check();
+        }
+    }
+
+    public MathDokuCell(MathDokuModel mathDokuModel){
+        this.mathDokuModel = mathDokuModel;
+        int dimensions = mathDokuModel.getCellDimensions();
 
         //setup the canvas for drawing
         Canvas canvas = new Canvas(dimensions, dimensions);
@@ -33,6 +41,7 @@ public class MathDokuCell extends StackPane{
         rect = new Rectangle(0,0,dimensions,dimensions);
         //rect.setStroke(Color.BLACK);
         rect.setFill(Color.TRANSPARENT);
+        highlight(Color.TRANSPARENT);
         gc.strokeRect(0, 0, dimensions, dimensions);
 
         /*
@@ -65,37 +74,27 @@ public class MathDokuCell extends StackPane{
             @Override
             public void handle(MouseEvent arg0) {
                 
-                mathDokuController.setCurrentStack(MathDokuCell.this);
+                mathDokuModel.setCurrentStack(MathDokuCell.this);
         
                 //Unhighlight previous cell
-                try {
-                    Node prevNode = mathDokuController.getPrevStack().getChildren().get(3);
-                    if (prevNode instanceof Rectangle){
-                        Rectangle rect = (Rectangle) prevNode;
-                        rect.setStroke(Color.TRANSPARENT);
-                    }
-                } catch (NullPointerException e) {
-                    System.out.println("No previous moves so cant unhighlight cell");
+                MathDokuCell prevCell = mathDokuModel.getPrevStack();
+                if (prevCell != null) {
+                    prevCell.highlight();
                 }
-        
+                
         
                 //TODO: decide if I want to use Canvas or Rectangle. Canvas is more flexible, but harder to change colour etc
         
                 //Highlight the currently selected node by redrawing
-                Node canvasNode = getChildren().get(0);
-                if (canvasNode instanceof Canvas){
-                    Canvas canvas = (Canvas) canvasNode;
-                    canvas.getGraphicsContext2D().setStroke(Color.YELLOW);
-                }
-        
-                //Highlight the currently selected node by changinc colour of rect
-                Node rectNode = getChildren().get(3);
-                if (rectNode instanceof Rectangle){
-                    Rectangle rect = (Rectangle) rectNode;
-                    rect.setStroke(Color.YELLOW);
-                    //save stack for unhighlighting next time
-                    mathDokuController.setPrevStack(MathDokuCell.this);
-                }
+                //gc.setStroke(Color.YELLOW);
+
+                //Highlight the currently selected node by changing colour of rect
+                //highlight(Color.YELLOW);
+                rect.setStroke(Color.YELLOW);
+
+
+                //save stack for unhighlighting next time
+                mathDokuModel.setPrevStack(MathDokuCell.this);
             }
         }
 
@@ -111,10 +110,15 @@ public class MathDokuCell extends StackPane{
             //Input is a number, so concatenate it with the existing number
             //prevent the user inputting a number greater than the highest possible
             String newNumber = number+input;
-            if (Integer.parseInt(newNumber) <= mathDokuController.getGridDimensions()){
-                mainNumber.setText(newNumber);
-                number = newNumber;
+            int intNumber = Integer.parseInt(newNumber);
+            //dont allow 0 as an option if the dimensions are less than 10
+            if (intNumber != 0 || mathDokuModel.getGridDimensions() > 9){
+                if (Integer.parseInt(newNumber) <= mathDokuModel.getGridDimensions()){
+                    mainNumber.setText(newNumber);
+                    setNumber(newNumber);
+                }
             }
+
         } catch (NumberFormatException e) {
             System.out.println("Someone tried to type a letter what a fool");
         }
@@ -129,12 +133,19 @@ public class MathDokuCell extends StackPane{
                     concat += numberArray[i];
                 }
                 mainNumber.setText(concat);
-                number = concat;
+                setNumber(concat);
             }
         }
     }
 
+    //only used in mathDokuModel
     public void highlight(Color color) {
-        rect.setStroke(color);
+        defaultColor = color;
+        rect.setStroke(defaultColor);
+    }
+
+    //used for unhighlighting previous cell
+    public void highlight() {
+        rect.setStroke(defaultColor);
     }
 }

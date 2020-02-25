@@ -97,7 +97,7 @@ public class MathDoku extends Application {
                         
                         //TODO: check if the show errors button is toggled
                         if (true) {
-                            mathDokuModel.checkColumnns();
+                            mathDokuModel.check();
                         }
                     }
                 }
@@ -146,11 +146,6 @@ public class MathDoku extends Application {
                         mathDokuModel.getCurrentStack().updateNumber("delete");
                     } else {
                         mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
-                    }
-                    
-                    //TODO: check if the show errors button is toggled
-                    if (true) {
-                        mathDokuModel.checkColumnns();
                     }
                 }
             }
