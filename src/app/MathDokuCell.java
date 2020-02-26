@@ -18,6 +18,20 @@ public class MathDokuCell extends StackPane{
     private Label mainNumber;
     private MathDokuModel mathDokuModel;
     private Color defaultColor;
+    private boolean rowConflict = false;
+    private boolean columnConflict = false;
+
+    public boolean hasConflict() {
+        return rowConflict || columnConflict;
+    }
+
+    public void setRowConflict(boolean bool) {
+        rowConflict = bool;
+    }
+
+    public void setColumnConflict(boolean bool) {
+        columnConflict = bool;
+    }
 
     public String getNumber(){
         return number;
@@ -79,7 +93,7 @@ public class MathDokuCell extends StackPane{
                 //Unhighlight previous cell
                 MathDokuCell prevCell = mathDokuModel.getPrevStack();
                 if (prevCell != null) {
-                    prevCell.highlight();
+                    prevCell.unhighlight();
                 }
                 
         
@@ -88,8 +102,7 @@ public class MathDokuCell extends StackPane{
                 //Highlight the currently selected node by redrawing
                 //gc.setStroke(Color.YELLOW);
 
-                //Highlight the currently selected node by changing colour of rect
-                //highlight(Color.YELLOW);
+                //Highlight the currently selected node by changing colour of rect. Dont update defaultColor
                 rect.setStroke(Color.YELLOW);
 
 
@@ -102,6 +115,21 @@ public class MathDokuCell extends StackPane{
     }
 
     public void updateNumber(String input) {
+
+        //If delete, delete the last number in the cell
+        //TODO: can I make this more elegant?
+        if (input.equals("delete")){
+            if (number.length() > 0){
+                String[] numberArray = number.split("");
+                String concat = "";
+                for (int i = 0; i < numberArray.length-1; i++) {
+                    concat += numberArray[i];
+                }
+                mainNumber.setText(concat);
+                setNumber(concat);
+                return;
+            }
+        }
     
         try {
             //Make sure it is an integer
@@ -120,21 +148,7 @@ public class MathDokuCell extends StackPane{
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("Someone tried to type a letter what a fool");
-        }
-        
-        //If delete, delete the last number in the cell
-        //TODO: can I make this more elegant?
-        if (input.equals("delete")){
-            if (number.length() > 0){
-                String[] numberArray = number.split("");
-                String concat = "";
-                for (int i = 0; i < numberArray.length-1; i++) {
-                    concat += numberArray[i];
-                }
-                mainNumber.setText(concat);
-                setNumber(concat);
-            }
+            //Someone tried to type a letter what a fool
         }
     }
 
@@ -145,7 +159,7 @@ public class MathDokuCell extends StackPane{
     }
 
     //used for unhighlighting previous cell
-    public void highlight() {
+    public void unhighlight() {
         rect.setStroke(defaultColor);
     }
 }
