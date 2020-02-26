@@ -20,6 +20,21 @@ public class MathDokuCell extends StackPane{
     private Color defaultColor;
     private boolean rowConflict = false;
     private boolean columnConflict = false;
+    private MathDokuCanvas mathDokuCanvas;
+    private MathDokuCage cage;
+    private Label targetNumber;
+
+    public void setTargetNumber(String target){
+        targetNumber.setText(target);
+    }
+
+    public MathDokuCage getCage() {
+        return this.cage;
+    }
+
+    public void setCage(MathDokuCage cage) {
+        this.cage = cage;
+    }
 
     public boolean hasConflict() {
         return rowConflict || columnConflict;
@@ -35,6 +50,10 @@ public class MathDokuCell extends StackPane{
 
     public String getNumber(){
         return number;
+    }
+
+    public void setCageWall(int index, boolean toggle) {
+        mathDokuCanvas.setCageWall(index, toggle);
     }
 
     private void setNumber(String newNumber){
@@ -58,23 +77,22 @@ public class MathDokuCell extends StackPane{
         highlight(Color.TRANSPARENT);
         gc.strokeRect(0, 0, dimensions, dimensions);
 
-        /*
         //do resizable canvas
         //TODO: change panes so that canvas can actually resize as the window does. I think after that it should work
-        MathDokuCanvas mathDokuCanvas = new MathDokuCanvas(mathDokuController);
+        mathDokuCanvas = new MathDokuCanvas(mathDokuModel);
         getChildren().add(mathDokuCanvas);
  
         // Bind canvas size to stack pane size.
         mathDokuCanvas.widthProperty().bind(MathDokuCell.this.widthProperty());
         mathDokuCanvas.heightProperty().bind(MathDokuCell.this.heightProperty());
-        */
+
 
         //setup main number label and targetNumber
         mainNumber = new Label(number);
         mainNumber.setFont(new Font("Arial", dimensions / 2));
         mainNumber.setStyle("-fx-font-weight: bold");
         mainNumber.setMaxWidth(dimensions);
-        Label targetNumber = new Label("12+");
+        targetNumber = new Label("12+");
         targetNumber.setFont(new Font("Arial", dimensions / 8));
 
         //add all nodes to the stack

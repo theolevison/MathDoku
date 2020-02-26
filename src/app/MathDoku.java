@@ -21,7 +21,7 @@ public class MathDoku extends Application {
     public void start(Stage stage) {
 
         //10*10 box for mathduko atm
-        int gridDimensions = 3;
+        int gridDimensions = 5;
         mathDokuModel.setCellDimensions(60);
         mathDokuModel.setGridDimensions(gridDimensions);
 
@@ -158,6 +158,7 @@ public class MathDoku extends Application {
         root.add(gridHBox, 2, 0, 1, 1);
         root.add(buttonVBox, 4, 0, 1, 1);
 
+        mathDokuModel.generateCages();
 
         Scene scene = new Scene(root,950,700);
         stage.setScene(scene);
