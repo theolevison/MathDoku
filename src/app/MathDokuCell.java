@@ -71,7 +71,14 @@ public class MathDokuCell extends StackPane{
         number = newNumber;
         mainNumber.setText(newNumber);
         //TODO: check if the show errors button is toggled and pass it in as a parameter
-        mathDokuModel.check(true);
+        boolean rowsColumns = mathDokuModel.check(true);
+        boolean maths = mathDokuModel.checkMaths(true);
+        //TODO: and all cells are filled in. To do that move this to MathDokuModel and just call from here
+        
+        if (rowsColumns && maths){
+            //TODO: make an actual winning animation or alert
+            System.out.println("You won!!!! Yay");
+        }
     }
 
     public MathDokuCell(MathDokuModel mathDokuModel){

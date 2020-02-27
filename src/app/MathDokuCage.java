@@ -3,20 +3,70 @@ package app;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javafx.scene.paint.Color;
+
 public class MathDokuCage extends ArrayList<MathDokuCell>{
     /**
      *
      */
     private static final long serialVersionUID = 1L;
+    //TODO: use trimToSize() to optimise storage
 
-    private String targetNumber;
+    private int targetNumber;
+    private String sign;
     private boolean display = false;
     Random rand = new Random();
 
+    public void setTargetNumber(int targetNumber, String sign) {
+        this.targetNumber = targetNumber;
+        this.sign = sign;
+    }
 
     public void addCell(MathDokuCell cell) {
         add(cell);
         cell.setCage(MathDokuCage.this);
+    }
+
+    //TODO: make it unhiglight, probably by having a totally different square to highlight, no that they are totally separate systems
+    public boolean checkMaths(){
+        try {
+            int sum;
+            if (sign.equals("+")){
+                sum = 0;
+                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                    sum += Integer.parseInt(mathDokuCell.getNumber());
+                }
+            } else if (sign.equals("-")){
+                sum = 0;
+                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                    //TODO: complete subtraction checking
+                    Integer.parseInt(mathDokuCell.getNumber());
+                }
+            } else if (sign.equals("x")){
+                sum = 1;
+                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                    sum = sum * Integer.parseInt(mathDokuCell.getNumber());
+                }
+            } else {
+                sum = 1;
+                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                    sum = Integer.parseInt(mathDokuCell.getNumber());
+                }
+            }
+
+            if (sum == targetNumber){
+                return true;
+            } else {
+                //highlight cells
+                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                    mathDokuCell.highlight(Color.ORANGE);
+                }
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            //cell not filled in yet so dont highlight as wrong
+            return true;
+        }
     }
 
     public void fillSingleCages(int gridDimensions){
@@ -25,7 +75,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             do {
                 num = rand.nextInt(gridDimensions);
                 get(0).setSolutionNumber(num);
-                targetNumber = String.valueOf(num);
+                targetNumber = num;
             } while (num == 0);
         }
     }
@@ -65,32 +115,36 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             
             //now decide what sign to use
             while (true){
-                int sign = rand.nextInt(4);
-                if (sign == 0){
+                int signNum = rand.nextInt(4);
+                if (signNum == 0){
                     int sum = 0;
                     for (MathDokuCell mathDokuCell : MathDokuCage.this) {
                         sum += mathDokuCell.getSolutionNumber();
                     }
-                    targetNumber = String.valueOf(sum) + "+";
+                    targetNumber = sum;
+                    sign = "+";
                     break;
                 }
                 //more complicated
                 //TODO: finish this
-                else if (sign == 1){
+                else if (signNum == 1){
                     
-                    targetNumber = "-";
+                    targetNumber = 0;
+                    sign = "-";
                     break;
-                } else if (sign == 2){
+                } else if (signNum == 2){
                     int sum = 1;
                     for (MathDokuCell mathDokuCell : MathDokuCage.this) {
                         sum = sum * mathDokuCell.getSolutionNumber();
                     }
-                    targetNumber = String.valueOf(sum) + "x";
+                    targetNumber = sum;
+                    sign = "x";
                     break;
                 } 
                 //division is the only sign that sometimes cannot be used
-                else if (sign == 3 && division){
-                    targetNumber = String.valueOf(divisionSolution) + "÷";
+                else if (signNum == 3 && division){
+                    targetNumber = divisionSolution;
+                    sign = "÷";
                     break;
                 }
             }
@@ -104,7 +158,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             return "";
         } else {
             display = true;
-            return targetNumber;
+            return targetNumber + sign;
         }
     }
 }

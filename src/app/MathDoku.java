@@ -19,9 +19,15 @@ public class MathDoku extends Application {
 
     @Override
     public void start(Stage stage) {
+        int gridDimensions;
 
-        //10*10 box for mathduko atm
-        int gridDimensions = 5;
+        //TODO: let the user specify dimensions, or use default of 6
+        if (false){
+            
+        } else {
+            gridDimensions = 6;
+        }
+        
         mathDokuModel.setCellDimensions(60);
         mathDokuModel.setGridDimensions(gridDimensions);
 
@@ -156,7 +162,12 @@ public class MathDoku extends Application {
         root.add(gridHBox, 2, 0, 1, 1);
         root.add(buttonVBox, 4, 0, 1, 1);
 
-        mathDokuModel.generateNewGrid();
+        //TODO: make this read a button toggle or something, make a lil menu to load from file, default or generate randomly
+        if (true){
+            mathDokuModel.generateDefaultGrid();
+        } else {
+            mathDokuModel.generateNewGrid();
+        }
 
         Scene scene = new Scene(root,950,700);
         stage.setScene(scene);

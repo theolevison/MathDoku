@@ -48,6 +48,110 @@ public class MathDokuModel {
         this.prevStack = prevStack;
     }
 
+    //create the same grid as specified
+    public void generateDefaultGrid() {
+        MathDokuCage cage1 = new MathDokuCage();
+        cage1.addCell(grid[0][0]);
+        cage1.addCell(grid[0][1]);
+        cage1.setTargetNumber(11,"+");
+        cages.add(cage1);
+
+        MathDokuCage cage2 = new MathDokuCage();
+        cage2.addCell(grid[1][0]);
+        cage2.addCell(grid[2][0]);
+        cage2.setTargetNumber(2,"÷");
+        cages.add(cage2);
+
+        MathDokuCage cage3 = new MathDokuCage();
+        cage3.addCell(grid[1][1]);
+        cage3.addCell(grid[2][1]);
+        cage3.setTargetNumber(3,"-");
+        cages.add(cage3);
+
+        MathDokuCage cage4 = new MathDokuCage();
+        cage4.addCell(grid[3][0]);
+        cage4.addCell(grid[3][1]);
+        cage4.setTargetNumber(20,"x");
+        cages.add(cage4);
+
+        MathDokuCage cage5 = new MathDokuCage();
+        cage5.addCell(grid[4][0]);
+        cage5.addCell(grid[5][0]);
+        cage5.addCell(grid[5][1]);
+        cage5.addCell(grid[5][2]);
+        cage5.setTargetNumber(6,"x");
+        cages.add(cage5);
+
+        MathDokuCage cage6 = new MathDokuCage();
+        cage6.addCell(grid[4][1]);
+        cage6.addCell(grid[4][2]);
+        cage6.setTargetNumber(3,"÷");
+        cages.add(cage6);
+
+        MathDokuCage cage7 = new MathDokuCage();
+        cage7.addCell(grid[0][2]);
+        cage7.addCell(grid[1][2]);
+        cage7.addCell(grid[0][3]);
+        cage7.addCell(grid[1][3]);
+        cage7.setTargetNumber(240,"x");
+        cages.add(cage7);
+
+        MathDokuCage cage8 = new MathDokuCage();
+        cage8.addCell(grid[2][2]);
+        cage8.addCell(grid[3][2]);
+        cage8.setTargetNumber(6,"x");
+        cages.add(cage8);
+
+        MathDokuCage cage9 = new MathDokuCage();
+        cage9.addCell(grid[0][4]);
+        cage9.addCell(grid[1][4]);
+        cage9.setTargetNumber(6,"x");
+        cages.add(cage9);
+
+        MathDokuCage cage10 = new MathDokuCage();
+        cage10.addCell(grid[2][3]);
+        cage10.addCell(grid[2][4]);
+        cage10.setTargetNumber(6,"x");
+        cages.add(cage10);
+
+        MathDokuCage cage11 = new MathDokuCage();
+        cage11.addCell(grid[3][3]);
+        cage11.addCell(grid[3][4]);
+        cage11.addCell(grid[4][4]);
+        cage11.setTargetNumber(7,"+");
+        cages.add(cage11);
+
+        MathDokuCage cage12 = new MathDokuCage();
+        cage12.addCell(grid[4][3]);
+        cage12.addCell(grid[5][3]);
+        cage12.setTargetNumber(30,"x");
+        cages.add(cage12);
+
+        //
+        MathDokuCage cage13 = new MathDokuCage();
+        cage13.addCell(grid[0][5]);
+        cage13.addCell(grid[1][5]);
+        cage13.addCell(grid[2][5]);
+        cage13.setTargetNumber(8,"+");
+        cages.add(cage13);
+
+        //
+        MathDokuCage cage14 = new MathDokuCage();
+        cage14.addCell(grid[3][5]);
+        cage14.addCell(grid[4][5]);
+        cage14.setTargetNumber(2,"÷");
+        cages.add(cage14);
+
+        //
+        MathDokuCage cage15 = new MathDokuCage();
+        cage15.addCell(grid[5][5]);
+        cage15.addCell(grid[5][4]);
+        cage15.setTargetNumber(9,"+");
+        cages.add(cage15);
+
+        drawCages();
+    }
+
     public void generateNewGrid() {
         
         generateCages();
@@ -58,12 +162,15 @@ public class MathDokuModel {
             mathDokuCage.fillSingleCages(gridDimensions);
         }
 
+        
         generateGeneralSolution();
 
+        /*
         //now calculate maths targets
         for (MathDokuCage mathDokuCage : cages) {
             mathDokuCage.fillBigCages(gridDimensions);
         }
+        */
 
         drawCages();
     }
@@ -76,10 +183,13 @@ public class MathDokuModel {
         //just basically copy the code again :(
 
         //In the unlikely event that there are two single cells with the same number, start the grid generation process over again
+        
+
         if (checkSolutions()){
             generateNewGrid();
             return;
         }
+        
 
         //DO NOT CHANGE SINGLE CAGES!!!
         Set<MathDokuCell> singleCells = new HashSet<MathDokuCell>();
@@ -89,6 +199,7 @@ public class MathDokuModel {
                 }
         }
 
+        
         //TODO: decide if the outer do-while is necessary
         //TODO: I think this could be improved with sets for rows and columns, then you wouldnt have to try out values that have already been entered
         do {
@@ -97,8 +208,8 @@ public class MathDokuModel {
             for (int i = 0; i < gridDimensions; i++) {
                 for (int j = 0; j < gridDimensions; j++) {
                     MathDokuCell cell = grid[i][j];
+
                     //DO NOT CHANGE SINGLE CAGES!!!
-                    
                     if (!singleCells.contains(cell)){
                         for (int k = 1; k <= gridDimensions; k++) {
                             //try out a number
@@ -115,6 +226,18 @@ public class MathDokuModel {
             }
             //TODO: get rid of this or make it !checkSolutions()
         } while (checkSolutions());
+        
+
+        //have to do this to reset after using checkSolutions()
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                MathDokuCell cell = grid[i][j];
+                cell.setRowConflict(false);
+                cell.setColumnConflict(false);
+            }
+        }
+        check(true);
+        
 
     }
 
@@ -273,12 +396,22 @@ public class MathDokuModel {
         }
     }
     */
+    public boolean checkMaths(boolean highlight){
+        for (MathDokuCage mathDokuCage : cages) {
+            if (!mathDokuCage.checkMaths()){
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     //TODO: see if this can be made more elegant/efficient/use of the same code in both parts/do all highlighting at the end? (idk if that would actually improve performance or make it worse)
-    public void check(boolean highlight){
-        //have to initalise these to make
+    public boolean check(boolean highlight){
+        //have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
+
         for (int i = 0; i < gridDimensions; i++) {
             Set<Integer> columnSet = new HashSet<Integer>();
             Set<Integer> rowSet = new HashSet<Integer>();
@@ -308,7 +441,6 @@ public class MathDokuModel {
                             }
                         }
                     }
-                    
                 } catch (NumberFormatException e) {
                     //Not all cells filled in so error thrown and caught
                 }
@@ -339,6 +471,7 @@ public class MathDokuModel {
                 }
             }
         }
+        return noColumnConflict && noRowConflict;
     }
 
     //TODO: idk try to merge with above, not likely to happen tbh
@@ -346,6 +479,7 @@ public class MathDokuModel {
         //have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
+
         for (int i = 0; i < gridDimensions; i++) {
             Set<Integer> columnSet = new HashSet<Integer>();
             Set<Integer> rowSet = new HashSet<Integer>();
@@ -359,7 +493,6 @@ public class MathDokuModel {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(true);
                             noColumnConflict = false;
-                            
                         }
                         //only need to find the first conflict, so move to the next column
                         //break;
@@ -369,7 +502,6 @@ public class MathDokuModel {
                             grid[i][k].setColumnConflict(false);
                         }
                     }
-                    
                 } catch (NumberFormatException e) {
                     //Not all cells filled in so error thrown and caught
                 }

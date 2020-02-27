@@ -8,7 +8,7 @@ public class MathDokuCanvas extends Canvas {
     private boolean[] cageWalls = {false, false, false, false};
 
     public MathDokuCanvas(MathDokuModel mathDokuModel){
-        int dimensions = mathDokuModel.getCellDimensions();
+        //int dimensions = mathDokuModel.getCellDimensions();
 
         //setup the canvas for drawing
         //GraphicsContext gc = getGraphicsContext2D();
