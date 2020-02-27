@@ -235,12 +235,22 @@ public class MathDokuModel {
         grid[x][y] = cell;
     }
 
+    /*
+    public void test(){
+        for (int i = 0; i < gridDimensions; i++) {
+            grid[i][0].highlight(Color.RED);
+        }
+    }
+    */
+
     //TODO: make this work with far right column
     //TODO: see if this can be made more elegant/efficient/use of the same code in both parts/do all highlighting at the end? (idk if that would actually improve performance or make it worse)
     public void check(){
         for (int i = 0; i < gridDimensions; i++) {
             Set<Integer> columnSet = new HashSet<Integer>();
             Set<Integer> rowSet = new HashSet<Integer>();
+            boolean noColumnConflict = true;
+            boolean noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
                 
                 //attempt to add number to columnSet, if there is a conflict then highlight the column
@@ -249,10 +259,16 @@ public class MathDokuModel {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].highlight(Color.RED);
                             grid[i][k].setColumnConflict(true);
+                            noColumnConflict = false;
+                            
                         }
                         //only need to find the first conflict to highlight it, so move to the next column
                         //break;
-                    } else {
+                    } 
+                    //TODO: here in lies the problem, as the bard would tell
+                    //TODO: if there is a valid number below the problem it undoes the highlighting
+                    
+                    else if (noColumnConflict){
                         //if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
                             //grid[k][i].highlight(Color.TRANSPARENT);
@@ -261,7 +277,8 @@ public class MathDokuModel {
                                 grid[i][k].highlight(Color.TRANSPARENT);
                             }
                         }
-                    }  
+                    }
+                    
                 } catch (NumberFormatException e) {
                     //Not all cells filled in so error thrown and caught
                 }
@@ -275,7 +292,7 @@ public class MathDokuModel {
                         }
                         //only need to find the first conflict to highlight it, so move to the next row
                         //break;
-                    } else {
+                    } else if (noRowConflict){
                         //if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
                             //grid[k][i].highlight(Color.TRANSPARENT);
@@ -291,5 +308,4 @@ public class MathDokuModel {
             }
         }
     }
-    //TODO: could make a custom event? Then it could be listened for by multiple filters. Nah probably not tbh mate
 }

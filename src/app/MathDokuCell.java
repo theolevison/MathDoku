@@ -63,7 +63,8 @@ public class MathDokuCell extends StackPane{
 
     public void setCageWall(int index, boolean toggle) {
         mathDokuCanvas.setCageWall(index, toggle);
-        setNumber(String.valueOf(cage.size()));
+        //TODO: remove this when i dont need to debug cages
+        //setNumber(String.valueOf(cage.size()));
     }
 
     private void setNumber(String newNumber){
