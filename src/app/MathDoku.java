@@ -95,10 +95,8 @@ public class MathDoku extends Application {
                         Button button = (Button) arg0.getTarget();
                         mathDokuModel.getCurrentStack().updateNumber(button.getText());
                         
-                        //TODO: check if the show errors button is toggled
-                        if (true) {
-                            mathDokuModel.check();
-                        }
+                        //TODO: check if the show errors button is toggled and pass it in as a parameter
+                        mathDokuModel.check(true);
                     }
                 }
             }

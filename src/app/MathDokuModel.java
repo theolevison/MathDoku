@@ -48,7 +48,6 @@ public class MathDokuModel {
         this.prevStack = prevStack;
     }
 
-    // TODO: Do all the maths here? Fill out a matrix and calculate the cages
     public void generateNewGrid() {
         
         generateCages();
@@ -61,6 +60,7 @@ public class MathDokuModel {
 
         generateGeneralSolution();
 
+        //now calculate maths targets
         for (MathDokuCage mathDokuCage : cages) {
             mathDokuCage.fillBigCages(gridDimensions);
         }
@@ -70,21 +70,52 @@ public class MathDokuModel {
 
     private void generateGeneralSolution(){
         //generate solution numbers based on normal sudoku rules, taking into account the single cell targets
-        //TODO: must fix highlighting before this can work correctly
+        //so that check works with solution numbers, we have to setNumber() instead of setSolutionNumber()
+        //remember to switch at the end before the grid is rendered
+        //never mind I see no easy way to do that without loads of faff and weird coupling
+        //just basically copy the code again :(
 
-        /*
-        do {
-            //try out solutions until no errors are found
-        } while (check());
-        */
-
-        /*
         //In the unlikely event that there are two single cells with the same number, start the grid generation process over again
-        if (conflict){
+        if (checkSolutions()){
             generateNewGrid();
             return;
         }
-        */
+
+        //DO NOT CHANGE SINGLE CAGES!!!
+        Set<MathDokuCell> singleCells = new HashSet<MathDokuCell>();
+        for (MathDokuCage mathDokuCage : cages) {
+                if (cages.size() == 1){
+                    singleCells.addAll(mathDokuCage);
+                }
+        }
+
+        //TODO: decide if the outer do-while is necessary
+        //TODO: I think this could be improved with sets for rows and columns, then you wouldnt have to try out values that have already been entered
+        do {
+            System.out.println("hiii");
+            //try out solutions until no errors are found
+            for (int i = 0; i < gridDimensions; i++) {
+                for (int j = 0; j < gridDimensions; j++) {
+                    MathDokuCell cell = grid[i][j];
+                    //DO NOT CHANGE SINGLE CAGES!!!
+                    
+                    if (!singleCells.contains(cell)){
+                        for (int k = 1; k <= gridDimensions; k++) {
+                            //try out a number
+                            cell.setSolutionNumber(k);
+                            //then check it hasnt broken any rules
+                            if (checkSolutions()){
+                                System.out.println(k);
+                                //System.out.println(count);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            //TODO: get rid of this or make it !checkSolutions()
+        } while (checkSolutions());
+
     }
 
 
@@ -243,35 +274,34 @@ public class MathDokuModel {
     }
     */
 
-    //TODO: make this work with far right column
     //TODO: see if this can be made more elegant/efficient/use of the same code in both parts/do all highlighting at the end? (idk if that would actually improve performance or make it worse)
-    public void check(){
+    public void check(boolean highlight){
+        //have to initalise these to make
+        boolean noColumnConflict = false;
+        boolean noRowConflict = false;
         for (int i = 0; i < gridDimensions; i++) {
             Set<Integer> columnSet = new HashSet<Integer>();
             Set<Integer> rowSet = new HashSet<Integer>();
-            boolean noColumnConflict = true;
-            boolean noRowConflict = true;
+            noColumnConflict = true;
+            noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
                 
                 //attempt to add number to columnSet, if there is a conflict then highlight the column
                 try {
                     if (!columnSet.add(Integer.parseInt(grid[i][j].getNumber()))){
                         for (int k = 0; k < gridDimensions; k++) {
-                            grid[i][k].highlight(Color.RED);
+                            if (highlight){
+                                grid[i][k].highlight(Color.RED);
+                            }
                             grid[i][k].setColumnConflict(true);
                             noColumnConflict = false;
                             
                         }
                         //only need to find the first conflict to highlight it, so move to the next column
                         //break;
-                    } 
-                    //TODO: here in lies the problem, as the bard would tell
-                    //TODO: if there is a valid number below the problem it undoes the highlighting
-                    
-                    else if (noColumnConflict){
+                    } else if (noColumnConflict){
                         //if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
-                            //grid[k][i].highlight(Color.TRANSPARENT);
                             grid[i][k].setColumnConflict(false);
                             if (!grid[i][k].hasConflict()){
                                 grid[i][k].highlight(Color.TRANSPARENT);
@@ -287,15 +317,17 @@ public class MathDokuModel {
                 try {
                     if (!rowSet.add(Integer.parseInt(grid[j][i].getNumber()))){
                         for (int k = 0; k < gridDimensions; k++) {
-                            grid[k][i].highlight(Color.RED);
+                            if (highlight){
+                                grid[k][i].highlight(Color.RED);
+                            }
                             grid[k][i].setRowConflict(true);
+                            noRowConflict = false;
                         }
                         //only need to find the first conflict to highlight it, so move to the next row
                         //break;
                     } else if (noRowConflict){
                         //if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
-                            //grid[k][i].highlight(Color.TRANSPARENT);
                             grid[k][i].setRowConflict(false);
                             if (!grid[k][i].hasConflict()){
                                 grid[k][i].highlight(Color.TRANSPARENT);
@@ -307,5 +339,62 @@ public class MathDokuModel {
                 }
             }
         }
+    }
+
+    //TODO: idk try to merge with above, not likely to happen tbh
+    public boolean checkSolutions(){
+        //have to initalise these to make the compiler stop complaining
+        boolean noColumnConflict = false;
+        boolean noRowConflict = false;
+        for (int i = 0; i < gridDimensions; i++) {
+            Set<Integer> columnSet = new HashSet<Integer>();
+            Set<Integer> rowSet = new HashSet<Integer>();
+            noColumnConflict = true;
+            noRowConflict = true;
+            for (int j = 0; j < gridDimensions; j++) {
+                
+                //attempt to add number to columnSet, check if there is a conflict
+                try {
+                    if (!columnSet.add(grid[i][j].getSolutionNumber())){
+                        for (int k = 0; k < gridDimensions; k++) {
+                            grid[i][k].setColumnConflict(true);
+                            noColumnConflict = false;
+                            
+                        }
+                        //only need to find the first conflict, so move to the next column
+                        //break;
+                    } else if (noColumnConflict){
+                        //everything is correct
+                        for (int k = 0; k < gridDimensions; k++) {
+                            grid[i][k].setColumnConflict(false);
+                        }
+                    }
+                    
+                } catch (NumberFormatException e) {
+                    //Not all cells filled in so error thrown and caught
+                }
+
+                //attempt to add number to rowSet, check if there is a conflict
+                try {
+                    if (!rowSet.add(grid[j][i].getSolutionNumber())){
+                        for (int k = 0; k < gridDimensions; k++) {
+                            grid[k][i].setRowConflict(true);
+                            noRowConflict = false;
+                        }
+                        //only need to find the first conflict, so move to the next row
+                        //break;
+                    } else if (noRowConflict){
+                        //everything is correct
+                        for (int k = 0; k < gridDimensions; k++) {
+                            grid[k][i].setRowConflict(false);
+                        }
+                    }  
+                } catch (NumberFormatException e) {
+                    //Not all cells filled in so error thrown and caught
+                }
+            }
+        }
+
+        return noColumnConflict && noRowConflict;
     }
 }

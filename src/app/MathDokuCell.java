@@ -23,7 +23,7 @@ public class MathDokuCell extends StackPane{
     private MathDokuCanvas mathDokuCanvas;
     private MathDokuCage cage;
     private Label targetNumber;
-    private int solutionNumber = 2;
+    private int solutionNumber;
 
     public void setSolutionNumber(int solutionNumber) {
         this.solutionNumber = solutionNumber;
@@ -70,10 +70,8 @@ public class MathDokuCell extends StackPane{
     private void setNumber(String newNumber){
         number = newNumber;
         mainNumber.setText(newNumber);
-        //TODO: check if the show errors button is toggled
-        if (true) {
-            mathDokuModel.check();
-        }
+        //TODO: check if the show errors button is toggled and pass it in as a parameter
+        mathDokuModel.check(true);
     }
 
     public MathDokuCell(MathDokuModel mathDokuModel){
