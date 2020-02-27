@@ -23,6 +23,15 @@ public class MathDokuCell extends StackPane{
     private MathDokuCanvas mathDokuCanvas;
     private MathDokuCage cage;
     private Label targetNumber;
+    private int solutionNumber = 2;
+
+    public void setSolutionNumber(int solutionNumber) {
+        this.solutionNumber = solutionNumber;
+    }
+
+    public int getSolutionNumber() {
+        return solutionNumber;
+    }
 
     public void setTargetNumber(String target){
         targetNumber.setText(target);
@@ -54,10 +63,12 @@ public class MathDokuCell extends StackPane{
 
     public void setCageWall(int index, boolean toggle) {
         mathDokuCanvas.setCageWall(index, toggle);
+        setNumber(String.valueOf(cage.size()));
     }
 
     private void setNumber(String newNumber){
         number = newNumber;
+        mainNumber.setText(newNumber);
         //TODO: check if the show errors button is toggled
         if (true) {
             mathDokuModel.check();
@@ -93,7 +104,7 @@ public class MathDokuCell extends StackPane{
         mainNumber.setStyle("-fx-font-weight: bold");
         mainNumber.setMaxWidth(dimensions);
         targetNumber = new Label("12+");
-        targetNumber.setFont(new Font("Arial", dimensions / 8));
+        targetNumber.setFont(new Font("Arial", dimensions / 6));
 
         //add all nodes to the stack
         getChildren().addAll(canvas, mainNumber, targetNumber, rect);
@@ -143,7 +154,7 @@ public class MathDokuCell extends StackPane{
                 for (int i = 0; i < numberArray.length-1; i++) {
                     concat += numberArray[i];
                 }
-                mainNumber.setText(concat);
+                //mainNumber.setText(concat);
                 setNumber(concat);
                 return;
             }
@@ -160,7 +171,7 @@ public class MathDokuCell extends StackPane{
             //dont allow 0 as an option if the dimensions are less than 10
             if (intNumber != 0 || mathDokuModel.getGridDimensions() > 9){
                 if (Integer.parseInt(newNumber) <= mathDokuModel.getGridDimensions()){
-                    mainNumber.setText(newNumber);
+                    //mainNumber.setText(newNumber);
                     setNumber(newNumber);
                 }
             }

@@ -158,7 +158,7 @@ public class MathDoku extends Application {
         root.add(gridHBox, 2, 0, 1, 1);
         root.add(buttonVBox, 4, 0, 1, 1);
 
-        mathDokuModel.generateCages();
+        mathDokuModel.generateNewGrid();
 
         Scene scene = new Scene(root,950,700);
         stage.setScene(scene);

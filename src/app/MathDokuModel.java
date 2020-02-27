@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class MathDokuModel {
@@ -14,7 +13,7 @@ public class MathDokuModel {
     private int cellDimensions;
     private int gridDimensions;
     private MathDokuCell[][] grid;
-    private ArrayList<MathDokuCage> cages;
+    private ArrayList<MathDokuCage> cages = new ArrayList<MathDokuCage>();
 
     public int getGridDimensions() {
         return this.gridDimensions;
@@ -50,7 +49,47 @@ public class MathDokuModel {
     }
 
     // TODO: Do all the maths here? Fill out a matrix and calculate the cages
-    public void generateCages() {
+    public void generateNewGrid() {
+        
+        generateCages();
+        //decide solution first before drawing and setting target numbers
+        //fill single cages to make layout more random and not symmetrical
+
+        for (MathDokuCage mathDokuCage : cages) {
+            mathDokuCage.fillSingleCages(gridDimensions);
+        }
+
+        generateGeneralSolution();
+
+        for (MathDokuCage mathDokuCage : cages) {
+            mathDokuCage.fillBigCages(gridDimensions);
+        }
+
+        drawCages();
+    }
+
+    private void generateGeneralSolution(){
+        //generate solution numbers based on normal sudoku rules, taking into account the single cell targets
+        //TODO: must fix highlighting before this can work correctly
+
+        /*
+        do {
+            //try out solutions until no errors are found
+        } while (check());
+        */
+
+        /*
+        //In the unlikely event that there are two single cells with the same number, start the grid generation process over again
+        if (conflict){
+            generateNewGrid();
+            return;
+        }
+        */
+    }
+
+
+    //TODO: make cage extend arraylist again, will make add nicer etc, but dont fuck with the drawing, atm i dont see an easier alternative to making the cells know their cage
+    private void generateCages() {
         Random rand = new Random();
         int cellsUsed = 0;
         int maximumCells = gridDimensions*gridDimensions;
@@ -58,13 +97,14 @@ public class MathDokuModel {
 
         while (cellsUsed < maximumCells) {
             //generate new cage from next available cell that isnt already in a cage. Update the cellsUsed count
-            cellsUsed += createCage(usedCellsSet, rand, cellsUsed, maximumCells);
+            MathDokuCage cageGroup = createCage(usedCellsSet, rand, cellsUsed, maximumCells);
+            cellsUsed += cageGroup.size();
+            cages.add(cageGroup);
             System.out.println(cellsUsed);
         }
-        drawCages();
     }
-
-    private int createCage(Set<MathDokuCell> usedCellsSet, Random rand, int cellsUsed, int maximumCells){
+    
+    private MathDokuCage createCage(Set<MathDokuCell> usedCellsSet, Random rand, int cellsUsed, int maximumCells){
         // Generate random integers in range 1 to gridDimensions inlusive
         int numberToAdd;
 
@@ -88,18 +128,18 @@ public class MathDokuModel {
                 
                 //if the cell is not in a cage, begin a cage from this cell
                 if (!usedCellsSet.contains(grid[i][j])){
-                    return addToCage(numberToAdd, 0, usedCellsSet, new MathDokuCage(), i, j, 0, 0);
+                    return addToCage(numberToAdd, usedCellsSet, new MathDokuCage(), i, j, 0, 0);
                 }
             }
         }
         //should never be reached
-        return 0;
+        return new MathDokuCage();
     }
 
     //recursively add to cage ahhhhh
-    private int addToCage(int numberToAdd, int numberAdded, Set<MathDokuCell> usedCellsSet, MathDokuCage cageGroup, int i, int j, int iToAdd, int jToAdd){
+    private MathDokuCage addToCage(int numberToAdd, Set<MathDokuCell> usedCellsSet, MathDokuCage cageGroup, int i, int j, int iToAdd, int jToAdd){
         if (numberToAdd == 0){
-            return numberAdded;
+            return cageGroup;
         } else {
             MathDokuCell cell;
             try {
@@ -108,18 +148,16 @@ public class MathDokuModel {
                 //indexes provided are not valid, so begin again at the start of the next row/column
                 //ensure tail recursion by passing everything
                 if (j >= gridDimensions-1){
-                    return addToCage(numberToAdd, numberAdded, usedCellsSet, cageGroup, i, 0, 1, 0);
+                    return addToCage(numberToAdd, usedCellsSet, cageGroup, i, 0, 1, 0);
                 } else {
-                    return addToCage(numberToAdd, numberAdded, usedCellsSet, cageGroup, 0, j, 0, 1);
+                    return addToCage(numberToAdd, usedCellsSet, cageGroup, 0, j, 0, 1);
                 }
             }
             
             if (!usedCellsSet.contains(cell)){
                 //update how many cells have been put in the cage
                 usedCellsSet.add(cell);
-                cell.setCage(cageGroup);
-                //cell.setCageWall(0, true);
-                numberAdded++;
+                cageGroup.addCell(cell);
                 //iterate right over 2 cells
                 /*
                     135 etc
@@ -134,13 +172,13 @@ public class MathDokuModel {
                     iToAdd++;
                     jToAdd--;
                 }
-                numberToAdd--;
-                return addToCage(numberToAdd, numberAdded, usedCellsSet, cageGroup, i, j, iToAdd, jToAdd);
+                //numberToAdd--;
+                return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, iToAdd, jToAdd);
             }
             //TODO: cant use this cell, so search right
             //ensure tail recursion by passing everything
-            numberToAdd--;
-            return addToCage(numberToAdd, numberAdded, usedCellsSet, cageGroup, i, j, 1, 0);
+            //numberToAdd--;
+            return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, 1, 0);
         }
     }
 
