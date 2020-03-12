@@ -14,25 +14,22 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 
 public class MathDoku extends Application {
-    //use mathDukoController to store everything like prevStacks, dimensions etc
+    // use mathDukoController to store everything like prevStacks, dimensions etc
     private MathDokuModel mathDokuModel = new MathDokuModel();
 
     @Override
     public void start(Stage stage) {
         int gridDimensions;
 
-        //TODO: let the user specify dimensions, or use default of 6
-        if (false){
-            
+        // TODO: let the user specify dimensions, or use default of 6
+        if (false) {
+
         } else {
             gridDimensions = 6;
         }
-        
+
         mathDokuModel.setCellDimensions(60);
         mathDokuModel.setGridDimensions(gridDimensions);
-
-        //TODO: move to model and use getters/setters. Or dont. You do you brudddaaaaa
-        
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -40,7 +37,7 @@ public class MathDoku extends Application {
         root.setVgap(10);
         root.setPadding(new Insets(10, 10, 10, 10));
 
-        //undo redo buttons
+        // undo redo buttons
         HBox undoRedoHBox = new HBox();
         Button undoButton = new Button("Undo");
         Button redoButton = new Button("Redo");
@@ -52,7 +49,10 @@ public class MathDoku extends Application {
         undoRedoHBox.setAlignment(Pos.CENTER);
         undoRedoHBox.setSpacing(10);
 
-        //load option buttons
+        undoButton.setOnAction(e -> mathDokuModel.undo());
+        redoButton.setOnAction(e -> mathDokuModel.redo());
+
+        // load option buttons
         HBox loadOptionsHBox = new HBox();
         Button loadFileButton = new Button("Load from file");
         Button loadTextButton = new Button("Load from text");
@@ -64,7 +64,7 @@ public class MathDoku extends Application {
         loadOptionsHBox.setAlignment(Pos.CENTER);
         loadOptionsHBox.setSpacing(10);
 
-        //clear button
+        // clear button
         HBox clearHBox = new HBox();
         Button clearButton = new Button("Clear");
         loadFileButton.setMaxWidth(Double.MAX_VALUE);
@@ -72,6 +72,31 @@ public class MathDoku extends Application {
         clearHBox.getChildren().addAll(clearButton);
         clearHBox.setAlignment(Pos.CENTER);
         clearHBox.setSpacing(10);
+
+        class ClearButtonEventHandler implements EventHandler<ActionEvent> {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                // ask the user for confirmation
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to clear the board?",
+                        ButtonType.OK);
+                alert.setTitle("Clear board");
+                alert.setHeaderText("");
+
+                //set background
+                alert.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                alert.getDialogPane().setId("confirmationDialog");
+                
+                alert.showAndWait().ifPresent(btnType -> {
+                    if (btnType == ButtonType.OK){
+                        //clear all cells
+                        mathDokuModel.clearAllCells();
+                    }
+                });
+            }
+        }
+
+        clearButton.setOnAction(new ClearButtonEventHandler());
 
         //show mistakes button
         HBox showMistakesHBox = new HBox();
@@ -92,14 +117,14 @@ public class MathDoku extends Application {
 
             @Override
             public void handle(ActionEvent arg0) {
-                if (mathDokuModel.getCurrentStack()!=null){
+                if (mathDokuModel.hasCurrentCell()){
                     EventTarget target = arg0.getTarget();
 
                     //get the text from the button
                     //TODO: try to git rid of casting please, maybe put numberButtons in its own class
                     if (target instanceof Button){
                         Button button = (Button) arg0.getTarget();
-                        mathDokuModel.getCurrentStack().updateNumber(button.getText());
+                        mathDokuModel.getCurrentCell().updateNumber(button.getText());
                         
                         //TODO: check if the show errors button is toggled and pass it in as a parameter
                         mathDokuModel.check(true);
@@ -144,12 +169,12 @@ public class MathDoku extends Application {
 
             @Override
             public void handle(KeyEvent arg0) {
-                if (mathDokuModel.getCurrentStack()!=null){
+                if (mathDokuModel.hasCurrentCell()){
                     //mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
                     if (arg0.getCode() == KeyCode.BACK_SPACE) {
-                        mathDokuModel.getCurrentStack().updateNumber("delete");
+                        mathDokuModel.getCurrentCell().updateNumber("delete");
                     } else {
-                        mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
+                        mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
                     }
                 }
             }
@@ -170,6 +195,12 @@ public class MathDoku extends Application {
         }
 
         Scene scene = new Scene(root,950,700);
+        //scene.getStylesheets().add("/style.css");
+        //new FileInputStream("style.css");
+        //String stylesheet = getClass().getResource("style.css").toExternalForm();
+        //stylesheet = new FileInputStream("style.css");
+        scene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+        //scene.getStylesheets().addAll(this.getClass().getResource("style.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("MathDoku");
 

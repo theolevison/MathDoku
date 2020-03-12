@@ -1,29 +1,27 @@
 package app;
 
+import java.util.Stack;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public class MathDokuCell extends StackPane{
     private String number = "";
-    private Rectangle rect;
     private Label mainNumber;
     private MathDokuModel mathDokuModel;
-    private Color defaultColor;
     private boolean rowConflict = false;
     private boolean columnConflict = false;
     private MathDokuCanvas mathDokuCanvas;
     private MathDokuCage cage;
     private Label targetNumber;
     private int solutionNumber;
+    private Stack<String> undoStack = new Stack<String>();
+    private Stack<String> redoStack = new Stack<String>();
 
     public void setSolutionNumber(int solutionNumber) {
         this.solutionNumber = solutionNumber;
@@ -67,15 +65,35 @@ public class MathDokuCell extends StackPane{
         //setNumber(String.valueOf(cage.size()));
     }
 
+    public void clearCell(){
+        setNumber("");
+    }
+
+    public void undo(){
+        redoStack.push(number);
+        setNumber(undoStack.pop());
+        mathDokuModel.pushToRedoStack(this);
+        System.out.println("tried to undo");
+    }
+
+    public void redo(){
+        undoStack.push(number);
+        setNumber(redoStack.pop());
+        mathDokuModel.getCurrentCell();
+        System.out.println("tried to redo");
+    }
+
     private void setNumber(String newNumber){
+        undoStack.push(number);
         number = newNumber;
         mainNumber.setText(newNumber);
+        //redoStack.push(newNumber);
         //TODO: check if the show errors button is toggled and pass it in as a parameter
         boolean rowsColumns = mathDokuModel.check(true);
         boolean maths = mathDokuModel.checkMaths(true);
-        //TODO: and all cells are filled in. To do that move this to MathDokuModel and just call from here
+        boolean allCellsFilled = mathDokuModel.checkAllCellsFilled();
         
-        if (rowsColumns && maths){
+        if (rowsColumns && maths && allCellsFilled){
             //TODO: make an actual winning animation or alert
             System.out.println("You won!!!! Yay");
         }
@@ -84,15 +102,6 @@ public class MathDokuCell extends StackPane{
     public MathDokuCell(MathDokuModel mathDokuModel){
         this.mathDokuModel = mathDokuModel;
         int dimensions = mathDokuModel.getCellDimensions();
-
-        //setup the canvas for drawing
-        Canvas canvas = new Canvas(dimensions, dimensions);
-        GraphicsContext gc = canvas.getGraphicsContext2D();    
-        rect = new Rectangle(0,0,dimensions,dimensions);
-        //rect.setStroke(Color.BLACK);
-        rect.setFill(Color.TRANSPARENT);
-        highlight(Color.TRANSPARENT);
-        gc.strokeRect(0, 0, dimensions, dimensions);
 
         //do resizable canvas
         //TODO: change panes so that canvas can actually resize as the window does. I think after that it should work
@@ -113,7 +122,7 @@ public class MathDokuCell extends StackPane{
         targetNumber.setFont(new Font("Arial", dimensions / 6));
 
         //add all nodes to the stack
-        getChildren().addAll(canvas, mainNumber, targetNumber, rect);
+        getChildren().addAll(mainNumber, targetNumber);
         setAlignment(Pos.CENTER);
         setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
         
@@ -126,7 +135,7 @@ public class MathDokuCell extends StackPane{
                 mathDokuModel.setCurrentStack(MathDokuCell.this);
         
                 //Unhighlight previous cell
-                MathDokuCell prevCell = mathDokuModel.getPrevStack();
+                MathDokuCell prevCell = mathDokuModel.getPrevCell();
                 if (prevCell != null) {
                     prevCell.unhighlight();
                 }
@@ -135,14 +144,11 @@ public class MathDokuCell extends StackPane{
                 //TODO: decide if I want to use Canvas or Rectangle. Canvas is more flexible, but harder to change colour etc
         
                 //Highlight the currently selected node by redrawing
-                //gc.setStroke(Color.YELLOW);
-
-                //Highlight the currently selected node by changing colour of rect. Dont update defaultColor
-                rect.setStroke(Color.YELLOW);
+                mathDokuCanvas.selectHighlight();
 
 
                 //save stack for unhighlighting next time
-                mathDokuModel.setPrevStack(MathDokuCell.this);
+                mathDokuModel.setPrevCell(MathDokuCell.this);
             }
         }
 
@@ -189,12 +195,11 @@ public class MathDokuCell extends StackPane{
 
     //only used in mathDokuModel
     public void highlight(Color color) {
-        defaultColor = color;
-        rect.setStroke(defaultColor);
+        mathDokuCanvas.highlight(color);
     }
 
     //used for unhighlighting previous cell
     public void unhighlight() {
-        rect.setStroke(defaultColor);
+        mathDokuCanvas.unhighlight();
     }
 }

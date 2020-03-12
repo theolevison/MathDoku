@@ -27,7 +27,6 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
         cell.setCage(MathDokuCage.this);
     }
 
-    //TODO: make it unhiglight, probably by having a totally different square to highlight, no that they are totally separate systems
     public boolean checkMaths(){
         try {
             int sum;
@@ -38,9 +37,15 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 }
             } else if (sign.equals("-")){
                 sum = 0;
+                ArrayList<Integer> list = new ArrayList<Integer>();
+                //sort low to high first (for this can be any order). Does prevent negative targets
                 for (MathDokuCell mathDokuCell : MathDokuCage.this){
-                    //TODO: complete subtraction checking
-                    Integer.parseInt(mathDokuCell.getNumber());
+                    list.add(Integer.parseInt(mathDokuCell.getNumber()));
+                }
+                list.sort(null); //low to high
+                //then check subtraction
+                for (Integer integer : list) {
+                    sum = integer-sum;
                 }
             } else if (sign.equals("x")){
                 sum = 1;
@@ -49,9 +54,18 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 }
             } else {
                 sum = 1;
+                ArrayList<Integer> list = new ArrayList<Integer>();
+                //sort low to high first
                 for (MathDokuCell mathDokuCell : MathDokuCage.this){
-                    sum = Integer.parseInt(mathDokuCell.getNumber());
+                    list.add(Integer.parseInt(mathDokuCell.getNumber()));
                 }
+                list.sort(null); //must be low to high otherwise it doesnt work
+                //then check division
+                for (Integer integer : list) {
+                    sum = integer/sum;
+                }
+                //otherwise use Collections.sort(list)
+
             }
 
             if (sum == targetNumber){
@@ -95,7 +109,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     int x = get(i).getSolutionNumber();
                     int y = get(j).getSolutionNumber();
                     //check if the remainder is zero and that the number is not the same
-                    //TODO: make sure this logic is correct
+                    //TODO: check all division combinations
                     if ((x%y)%divisionQuotient == 0 && x/y != 1){
                         //pair is divisible, save to test with the next value and skip the for loop
                         divisionQuotient = (x/y)/divisionQuotient;

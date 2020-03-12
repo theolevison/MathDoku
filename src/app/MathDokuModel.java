@@ -4,16 +4,24 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.Stack;
 
 import javafx.scene.paint.Color;
 
 public class MathDokuModel {
-    private MathDokuCell prevStack;
-    private MathDokuCell currentStack;
+    private MathDokuCell prevCell;
+    private MathDokuCell currentCell;
     private int cellDimensions;
     private int gridDimensions;
     private MathDokuCell[][] grid;
     private ArrayList<MathDokuCage> cages = new ArrayList<MathDokuCage>();
+    private Stack<MathDokuCell> undoStack = new Stack<MathDokuCell>();
+    private Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
+
+    public void pushToRedoStack(MathDokuCell cell){
+        redoStack.push(cell);
+        System.out.println("added to redo stack");
+    }
 
     public int getGridDimensions() {
         return this.gridDimensions;
@@ -24,12 +32,18 @@ public class MathDokuModel {
         grid = new MathDokuCell[gridDimensions][gridDimensions];
     }
 
-    public MathDokuCell getCurrentStack() {
-        return this.currentStack;
+    public MathDokuCell getCurrentCell() {
+        undoStack.push(currentCell);
+        System.out.println("added to undo stack");
+        return this.currentCell;
     }
 
-    public void setCurrentStack(MathDokuCell currentStack) {
-        this.currentStack = currentStack;
+    public boolean hasCurrentCell(){
+        return currentCell != null;
+    }
+
+    public void setCurrentStack(MathDokuCell currentCell) {
+        this.currentCell = currentCell;
     }
 
     public int getCellDimensions() {
@@ -40,12 +54,12 @@ public class MathDokuModel {
         this.cellDimensions = cellDimensions;
     }
 
-    public MathDokuCell getPrevStack() {
-        return prevStack;
+    public MathDokuCell getPrevCell() {
+        return prevCell;
     }
 
-    public void setPrevStack(MathDokuCell prevStack) {
-        this.prevStack = prevStack;
+    public void setPrevCell(MathDokuCell prevStack) {
+        this.prevCell = prevStack;
     }
 
     //create the same grid as specified
@@ -127,7 +141,6 @@ public class MathDokuModel {
         cage12.setTargetNumber(30,"x");
         cages.add(cage12);
 
-        //
         MathDokuCage cage13 = new MathDokuCage();
         cage13.addCell(grid[0][5]);
         cage13.addCell(grid[1][5]);
@@ -135,14 +148,12 @@ public class MathDokuModel {
         cage13.setTargetNumber(8,"+");
         cages.add(cage13);
 
-        //
         MathDokuCage cage14 = new MathDokuCage();
         cage14.addCell(grid[3][5]);
         cage14.addCell(grid[4][5]);
         cage14.setTargetNumber(2,"÷");
         cages.add(cage14);
 
-        //
         MathDokuCage cage15 = new MathDokuCage();
         cage15.addCell(grid[5][5]);
         cage15.addCell(grid[5][4]);
@@ -150,6 +161,22 @@ public class MathDokuModel {
         cages.add(cage15);
 
         drawCages();
+    }
+
+    public void undo(){
+        undoStack.pop().undo();
+    }
+
+    public void redo(){
+        redoStack.pop().redo();
+    }
+
+    public void clearAllCells(){
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                grid[i][j].clearCell();
+            }
+        }
     }
 
     public void generateNewGrid() {
@@ -242,7 +269,6 @@ public class MathDokuModel {
     }
 
 
-    //TODO: make cage extend arraylist again, will make add nicer etc, but dont fuck with the drawing, atm i dont see an easier alternative to making the cells know their cage
     private void generateCages() {
         Random rand = new Random();
         int cellsUsed = 0;
@@ -326,12 +352,10 @@ public class MathDokuModel {
                     iToAdd++;
                     jToAdd--;
                 }
-                //numberToAdd--;
                 return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, iToAdd, jToAdd);
             }
-            //TODO: cant use this cell, so search right
+            //cant use this cell, so search right
             //ensure tail recursion by passing everything
-            //numberToAdd--;
             return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, 1, 0);
         }
     }
@@ -397,12 +421,25 @@ public class MathDokuModel {
     }
     */
     public boolean checkMaths(boolean highlight){
+        boolean check = true;
+
         for (MathDokuCage mathDokuCage : cages) {
             if (!mathDokuCage.checkMaths()){
-                return false;
+                check = false;
             }
         }
 
+        return check;
+    }
+
+    public boolean checkAllCellsFilled() {
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                if (grid[i][j].getNumber() == ""){
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -437,7 +474,7 @@ public class MathDokuModel {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(false);
                             if (!grid[i][k].hasConflict()){
-                                grid[i][k].highlight(Color.TRANSPARENT);
+                                grid[i][k].highlight(Color.GREY);
                             }
                         }
                     }
@@ -462,7 +499,7 @@ public class MathDokuModel {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(false);
                             if (!grid[k][i].hasConflict()){
-                                grid[k][i].highlight(Color.TRANSPARENT);
+                                grid[k][i].highlight(Color.GREY);
                             }
                         }
                     }  
