@@ -67,24 +67,27 @@ public class MathDokuCell extends StackPane{
 
     public void clearCell(){
         setNumber("");
+        redoStack.clear();
+        undoStack.clear();
     }
 
     public void undo(){
         redoStack.push(number);
-        setNumber(undoStack.pop());
         mathDokuModel.pushToRedoStack(this);
+        setNumber(undoStack.pop());
         System.out.println("tried to undo");
     }
 
     public void redo(){
         undoStack.push(number);
+        mathDokuModel.pushToUndoStack(this);
         setNumber(redoStack.pop());
-        mathDokuModel.getCurrentCell();
         System.out.println("tried to redo");
     }
 
     private void setNumber(String newNumber){
         undoStack.push(number);
+        //mathDokuModel.pushToUndoStack(this);
         number = newNumber;
         mainNumber.setText(newNumber);
         //redoStack.push(newNumber);
@@ -97,6 +100,7 @@ public class MathDokuCell extends StackPane{
             //TODO: make an actual winning animation or alert
             System.out.println("You won!!!! Yay");
         }
+        mathDokuModel.toggleUndoRedo();
     }
 
     public MathDokuCell(MathDokuModel mathDokuModel){
@@ -126,29 +130,27 @@ public class MathDokuCell extends StackPane{
         setAlignment(Pos.CENTER);
         setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
         
-        //TODO: you dont need any of the casting to rectangle etc because its all within scope you silly man, fix this!
         class GridMouseClickHandler implements EventHandler<MouseEvent> {
         
             @Override
             public void handle(MouseEvent arg0) {
                 
                 mathDokuModel.setCurrentStack(MathDokuCell.this);
-        
+                
                 //Unhighlight previous cell
                 MathDokuCell prevCell = mathDokuModel.getPrevCell();
                 if (prevCell != null) {
                     prevCell.unhighlight();
                 }
                 
-        
-                //TODO: decide if I want to use Canvas or Rectangle. Canvas is more flexible, but harder to change colour etc
-        
                 //Highlight the currently selected node by redrawing
                 mathDokuCanvas.selectHighlight();
 
 
                 //save stack for unhighlighting next time
                 mathDokuModel.setPrevCell(MathDokuCell.this);
+
+                
             }
         }
 

@@ -15,7 +15,17 @@ import javafx.scene.layout.*;
 
 public class MathDoku extends Application {
     // use mathDukoController to store everything like prevStacks, dimensions etc
-    private MathDokuModel mathDokuModel = new MathDokuModel();
+    private MathDokuModel mathDokuModel = new MathDokuModel(this);
+    private Button undoButton;
+    private Button redoButton;
+
+    public void enableDisableUndo(boolean bool){
+        undoButton.setDisable(bool);
+    }
+
+    public void enableDisableRedo(boolean bool){
+        redoButton.setDisable(bool);
+    }
 
     @Override
     public void start(Stage stage) {
@@ -39,8 +49,8 @@ public class MathDoku extends Application {
 
         // undo redo buttons
         HBox undoRedoHBox = new HBox();
-        Button undoButton = new Button("Undo");
-        Button redoButton = new Button("Redo");
+        undoButton = new Button("Undo");
+        redoButton = new Button("Redo");
         undoButton.setMaxWidth(Double.MAX_VALUE);
         redoButton.setMaxWidth(Double.MAX_VALUE);
         undoButton.setMaxHeight(Double.MAX_VALUE);
@@ -51,6 +61,23 @@ public class MathDoku extends Application {
 
         undoButton.setOnAction(e -> mathDokuModel.undo());
         redoButton.setOnAction(e -> mathDokuModel.redo());
+
+        //TODO: make these enable when the stacks are not empty. Use custom events and handlers to do it?
+        undoButton.setDisable(true);
+        redoButton.setDisable(true);
+
+        /*
+        abstract class UndoEmpty extends Event {
+            private static final long serialVersionUID = 1L;
+
+            public UndoEmpty(EventType<? extends Event> arg0) {
+                super(arg0);
+            }            
+        }
+
+        EventType<UndoEmpty> UNDOEMPTY = new EventType<>();
+        */
+
 
         // load option buttons
         HBox loadOptionsHBox = new HBox();
@@ -174,11 +201,19 @@ public class MathDoku extends Application {
                     if (arg0.getCode() == KeyCode.BACK_SPACE) {
                         mathDokuModel.getCurrentCell().updateNumber("delete");
                     } else {
-                        mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
+                        try {
+                            //Make sure it is an integer
+                            Integer.parseInt(arg0.getText());
+                            mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
+                        } catch (NumberFormatException e) {
+                            //Someone tried to type a letter what a fool
+                        }
                     }
                 }
             }
-        } 
+        }
+
+        
 
         root.setOnKeyPressed(new KeyboardInputEventHandler());
 

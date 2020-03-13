@@ -15,12 +15,28 @@ public class MathDokuModel {
     private int gridDimensions;
     private MathDokuCell[][] grid;
     private ArrayList<MathDokuCage> cages = new ArrayList<MathDokuCage>();
-    private Stack<MathDokuCell> undoStack = new Stack<MathDokuCell>();
-    private Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
+    public Stack<MathDokuCell> undoStack = new Stack<MathDokuCell>();
+    public Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
+    private MathDoku mathDoku;
+
+    //I hate this but its the easiest way
+    public MathDokuModel(MathDoku mathDoku){
+        this.mathDoku = mathDoku;
+    }
+
+    public void toggleUndoRedo(){
+        mathDoku.enableDisableUndo(undoStack.empty());
+        mathDoku.enableDisableRedo(redoStack.empty());
+    }
 
     public void pushToRedoStack(MathDokuCell cell){
         redoStack.push(cell);
         System.out.println("added to redo stack");
+    }
+
+    public void pushToUndoStack(MathDokuCell cell){
+        undoStack.push(cell);
+        System.out.println("added to undo stack");
     }
 
     public int getGridDimensions() {
@@ -177,6 +193,9 @@ public class MathDokuModel {
                 grid[i][j].clearCell();
             }
         }
+        redoStack.clear();
+        undoStack.clear();
+        toggleUndoRedo();
     }
 
     public void generateNewGrid() {
