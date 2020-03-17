@@ -1,11 +1,21 @@
 package app;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -62,21 +72,8 @@ public class MathDoku extends Application {
         undoButton.setOnAction(e -> mathDokuModel.undo());
         redoButton.setOnAction(e -> mathDokuModel.redo());
 
-        //TODO: make these enable when the stacks are not empty. Use custom events and handlers to do it?
         undoButton.setDisable(true);
         redoButton.setDisable(true);
-
-        /*
-        abstract class UndoEmpty extends Event {
-            private static final long serialVersionUID = 1L;
-
-            public UndoEmpty(EventType<? extends Event> arg0) {
-                super(arg0);
-            }            
-        }
-
-        EventType<UndoEmpty> UNDOEMPTY = new EventType<>();
-        */
 
 
         // load option buttons
@@ -90,6 +87,82 @@ public class MathDoku extends Application {
         loadOptionsHBox.getChildren().addAll(loadFileButton, loadTextButton);
         loadOptionsHBox.setAlignment(Pos.CENTER);
         loadOptionsHBox.setSpacing(10);
+
+        class LoadFileEventHandler implements EventHandler<ActionEvent> {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Select a MathDoku file");
+                File file = fileChooser.showOpenDialog(stage);
+                
+                if (file != null){
+                    try {
+                        BufferedReader br = new BufferedReader(new FileReader(file));
+                        List<String> list = new ArrayList<String>();
+
+                        String str;
+                        while ((str = br.readLine()) != null){
+                            list.add(str);
+                        }
+                        br.close();
+
+                        mathDokuModel.generateFromList(list);
+                    } catch (Exception e) {
+                        
+                    }
+                }
+            }
+        }
+
+        class LoadTextEventHandler implements EventHandler<ActionEvent> {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                // create a text input dialog
+                TextInputDialog textInput = new TextInputDialog();
+                textInput.setTitle("Load from text");
+                textInput.setHeaderText("");
+                textInput.setContentText("Please enter text with correct formatting");
+
+                //set background
+                textInput.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                textInput.getDialogPane().setId("textInputDialog");
+                
+                Optional<String> result = textInput.showAndWait();
+                //System.out.println(textInput.getEditor().getText());
+                
+                //textInput.showAndWait().ifPresent(results -> System.out.println(results));
+                
+                Button okButton = (Button) textInput.getDialogPane().lookupButton(ButtonType.OK);
+                TextField inputField = textInput.getEditor();
+                BooleanBinding isInvalid = Bindings.createBooleanBinding(() -> isInvalid(inputField.getText()), inputField.textProperty());
+                okButton.disableProperty().bind(isInvalid);
+
+                result.ifPresent(resultString -> 
+                {
+                    List<String> list = new ArrayList<String>();
+                    for (String line : resultString.split("")) {
+                        list.add(line);
+                    }
+                    
+                    System.out.println(list);
+                    mathDokuModel.generateFromList(list);
+                });
+                
+            }
+
+            //disable the okay button if format is incorrect
+            private boolean isInvalid(String text){
+                if (true){
+
+                }
+                return true;
+            }
+        }
+
+        loadFileButton.setOnAction(new LoadFileEventHandler());
+        loadTextButton.setOnAction(new LoadTextEventHandler());
 
         // clear button
         HBox clearHBox = new HBox();

@@ -13,6 +13,21 @@
     -fx-font-size: 46px;
 }
 
+#textInputDialog{
+    -fx-background-image: url("pepe.jpeg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: 900 506;
+    -fx-background-position: center center;
+    -fx-graphic: url("creepyMoon.png");
+    
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); 
+}
+#textInputDialog .label {
+    -fx-text-fill: #ff0000;
+    -fx-font-size: 46px;
+}
+
 .button:hover {
     -fx-background-color: #B118C8
 }

@@ -2,6 +2,7 @@ package app;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
@@ -76,6 +77,11 @@ public class MathDokuModel {
 
     public void setPrevCell(MathDokuCell prevStack) {
         this.prevCell = prevStack;
+    }
+
+    //create grid from ArrayList
+    public void generateFromList(List<String> list) {
+        
     }
 
     //create the same grid as specified
