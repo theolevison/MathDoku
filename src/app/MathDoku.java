@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
@@ -101,12 +102,31 @@ public class MathDoku extends Application {
                         BufferedReader br = new BufferedReader(new FileReader(file));
                         List<String> list = new ArrayList<String>();
 
-                        String str;
-                        while ((str = br.readLine()) != null){
-                            list.add(str);
+                        String tempString;
+                        String text = "";
+                        while ((tempString = br.readLine()) != null){
+                            list.add(tempString);
+                            text += tempString;
                         }
+
                         br.close();
 
+                        //check it meets the correct formatting, otherwise create an alert
+                        if (isInvalid(text)){
+                            Alert alert = new Alert(Alert.AlertType.WARNING, "The file you selected is not formatted correctly");
+                            alert.setTitle("Incorrect format");
+                            alert.setHeaderText("");
+
+                            //set background
+                            alert.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                            alert.getDialogPane().setId("formatWarningDialog");
+
+                            alert.showAndWait();
+
+                            return;
+                        }
+
+                        //send the list of cages to mathDokuModel
                         mathDokuModel.generateFromList(list);
                     } catch (Exception e) {
                         
@@ -119,45 +139,65 @@ public class MathDoku extends Application {
 
             @Override
             public void handle(ActionEvent arg0) {
-                // create a text input dialog
-                TextInputDialog textInput = new TextInputDialog();
-                textInput.setTitle("Load from text");
-                textInput.setHeaderText("");
-                textInput.setContentText("Please enter text with correct formatting");
+                Dialog<String> textDialog = new Dialog<String>();
+                textDialog.setTitle("Load from text");
+                textDialog.setHeaderText("");
+
+                textDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(10, 10, 10, 10));
+
+                TextArea textArea = new TextArea();
+                Label label = new Label("Please enter text with correct formatting");
+
+                
+                grid.add(label, 0, 0);
+                grid.add(textArea, 1, 0);
+
+                textDialog.getDialogPane().setContent(grid);
+
+                //set focus on the textArea
+                Platform.runLater(() -> textArea.requestFocus());
+
+                textDialog.setResultConverter(dialogButton -> {
+                    if (dialogButton == ButtonType.OK) {
+                        return textArea.getText();
+                    }
+                    return null;
+                });
 
                 //set background
-                textInput.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
-                textInput.getDialogPane().setId("textInputDialog");
+                textDialog.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                textDialog.getDialogPane().setId("textInputDialog");
                 
-                Optional<String> result = textInput.showAndWait();
-                //System.out.println(textInput.getEditor().getText());
-                
-                //textInput.showAndWait().ifPresent(results -> System.out.println(results));
-                
-                Button okButton = (Button) textInput.getDialogPane().lookupButton(ButtonType.OK);
-                TextField inputField = textInput.getEditor();
-                BooleanBinding isInvalid = Bindings.createBooleanBinding(() -> isInvalid(inputField.getText()), inputField.textProperty());
-                okButton.disableProperty().bind(isInvalid);
+                Button okButton = (Button) textDialog.getDialogPane().lookupButton(ButtonType.OK);
 
+                /*
+                //allow the user to use enter without closing the dialog
+                okButton.setDefaultButton(false);
+                */
+
+                //disable the okay button if the format is incorrect
+                BooleanBinding isInvalidBinding = Bindings.createBooleanBinding(() -> isInvalid(textArea.getText()), textArea.textProperty());
+                okButton.disableProperty().bind(isInvalidBinding);
+
+                //display dialog
+                Optional<String> result = textDialog.showAndWait();
+
+                //send the list of cages to mathDokuModel
                 result.ifPresent(resultString -> 
                 {
                     List<String> list = new ArrayList<String>();
-                    for (String line : resultString.split("")) {
+                    for (String line : resultString.split("\n")) {
                         list.add(line);
                     }
                     
-                    System.out.println(list);
                     mathDokuModel.generateFromList(list);
                 });
                 
-            }
-
-            //disable the okay button if format is incorrect
-            private boolean isInvalid(String text){
-                if (true){
-
-                }
-                return true;
             }
         }
 
@@ -286,7 +326,6 @@ public class MathDoku extends Application {
             }
         }
 
-        
 
         root.setOnKeyPressed(new KeyboardInputEventHandler());
 
@@ -332,6 +371,50 @@ public class MathDoku extends Application {
             listOfVBoxes[i] = vBox;
         }
         return listOfVBoxes;
+    }
+
+    //checks if format of text is incorrect
+    private boolean isInvalid(String text){
+        try {
+            for (String line : text.split("\n")) {
+                String[] array1 = line.split(" ");
+                String[] targetArray = array1[0].split("");
+                String[] numberArray = array1[1].split(",");
+
+                for (int i = 0; i < targetArray.length-1; i++) {
+                    try {
+                        Integer.parseInt(targetArray[i]);
+                    } catch (NumberFormatException e) {
+                        return true;
+                    }
+                }
+
+                if (!targetArray[targetArray.length-1].matches("\\+|-|x|÷")){
+                    return true;
+                }
+
+                //if there is only one cell
+                if (numberArray.length == 0){
+                    try {
+                        Integer.parseInt(array1[1]);
+                    } catch (NumberFormatException e) {
+                        return true;
+                    }
+                } else {
+                    for (int i = 0; i < numberArray.length; i++) {
+                        try {
+                            Integer.parseInt(numberArray[i]);
+                        } catch (NumberFormatException e) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (IndexOutOfBoundsException e) {
+            return true;
+        }
+        
     }
 
     public static void main(String[] args) {
