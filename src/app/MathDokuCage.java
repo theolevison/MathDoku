@@ -1,6 +1,7 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javafx.scene.paint.Color;
@@ -54,7 +55,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 }
             } else {
                 sum = 1;
-                ArrayList<Integer> list = new ArrayList<Integer>();
+                List<Integer> list = new ArrayList<Integer>();
                 //sort low to high first
                 for (MathDokuCell mathDokuCell : MathDokuCage.this){
                     list.add(Integer.parseInt(mathDokuCell.getNumber()));

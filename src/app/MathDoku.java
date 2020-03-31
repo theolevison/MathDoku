@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -29,6 +31,7 @@ public class MathDoku extends Application {
     private MathDokuModel mathDokuModel = new MathDokuModel(this);
     private Button undoButton;
     private Button redoButton;
+    private int gridDimensions;
 
     public void enableDisableUndo(boolean bool){
         undoButton.setDisable(bool);
@@ -40,7 +43,6 @@ public class MathDoku extends Application {
 
     @Override
     public void start(Stage stage) {
-        int gridDimensions;
 
         // TODO: let the user specify dimensions, or use default of 6
         if (false) {
@@ -105,8 +107,8 @@ public class MathDoku extends Application {
                         String tempString;
                         String text = "";
                         while ((tempString = br.readLine()) != null){
-                            list.add(tempString);
-                            text += tempString;
+                            list.add(tempString + System.lineSeparator());
+                            text += tempString + System.lineSeparator();
                         }
 
                         br.close();
@@ -174,11 +176,6 @@ public class MathDoku extends Application {
                 textDialog.getDialogPane().setId("textInputDialog");
                 
                 Button okButton = (Button) textDialog.getDialogPane().lookupButton(ButtonType.OK);
-
-                /*
-                //allow the user to use enter without closing the dialog
-                okButton.setDefaultButton(false);
-                */
 
                 //disable the okay button if the format is incorrect
                 BooleanBinding isInvalidBinding = Bindings.createBooleanBinding(() -> isInvalid(textArea.getText()), textArea.textProperty());
@@ -375,8 +372,14 @@ public class MathDoku extends Application {
 
     //checks if format of text is incorrect
     private boolean isInvalid(String text){
+        //first get the square root of the highest number to get dimensions
+        List<Integer[]> allNumbersList = new ArrayList<Integer[]>();
+
         try {
-            for (String line : text.split("\n")) {
+            Set<Integer> usedCellsSet = new HashSet<Integer>();
+
+            //check formatting
+            for (String line : text.split(System.lineSeparator())) {
                 String[] array1 = line.split(" ");
                 String[] targetArray = array1[0].split("");
                 String[] numberArray = array1[1].split(",");
@@ -397,19 +400,64 @@ public class MathDoku extends Application {
                 if (numberArray.length == 0){
                     try {
                         Integer.parseInt(array1[1]);
+                        allNumbersList.add(new Integer[] {Integer.parseInt(array1[1])});
                     } catch (NumberFormatException e) {
                         return true;
                     }
                 } else {
+                    Integer[] intArray = new Integer[numberArray.length];
+                    
                     for (int i = 0; i < numberArray.length; i++) {
                         try {
-                            Integer.parseInt(numberArray[i]);
+                            Integer cell = Integer.parseInt(numberArray[i]);
+
+                            //check the cell has not been used before
+                            if (!usedCellsSet.add(cell)){
+                                return true;
+                            }
+
+                            //add the cells so we can check if they are adjacent
+                            intArray[i] = cell;
+
                         } catch (NumberFormatException e) {
                             return true;
                         }
                     }
+                    allNumbersList.add(intArray);
                 }
             }
+            
+            Integer highestNumber = 0;
+            
+            for (Integer[] list : allNumbersList) {
+                for (Integer integer : list) {
+                    //update highest number
+                    highestNumber = integer >= highestNumber ? integer : highestNumber;
+                }
+            }
+            //update grid dimensions
+            //this part only works once all cells have been typed out and the highest number is a valid grid dimension
+            gridDimensions = (int)Math.floor(Math.sqrt(highestNumber));
+            System.out.println(gridDimensions);
+
+            //check cages are valid
+            for (Integer[] list : allNumbersList) {
+                //only need to test half?
+                for (int i = 0; i < list.length/2; i++) {
+                    Integer cell1 = list[i];
+                    boolean check = true;
+                    for (int j = i+1; j < list.length; j++) {
+                        Integer cell2 = list[j];
+                        if (cell1 == cell2-1 || cell1 == cell2-gridDimensions){
+                        check = false;
+                        }
+                    }
+                    if (check){
+                        return true;
+                    }
+                }
+            }
+
             return false;
         } catch (IndexOutOfBoundsException e) {
             return true;
