@@ -9,6 +9,11 @@ import java.util.Stack;
 
 import javafx.scene.paint.Color;
 
+/**
+ * Handles the game rules, generating problems and genrating solutions.
+ * 
+ * @author Theo Levison
+ */
 public class MathDokuModel {
     private MathDokuCell prevCell;
     private MathDokuCell currentCell;
@@ -20,71 +25,158 @@ public class MathDokuModel {
     public Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
     private MathDoku mathDoku;
 
-    //I hate this but its the easiest way
+    /**
+     * Constructor, reference to mathDoku required for undo/redo.
+     * <p>
+     * Breaks the ideal rules of OOP, but it's the easiest way to get the required undo/redo functionality.
+     * 
+     * @param mathDoku The parent class
+     */
     public MathDokuModel(MathDoku mathDoku){
         this.mathDoku = mathDoku;
     }
 
+    /**
+     * Disables undo and redo buttons if their respective stacks are empty, otherwise enables them.
+     */
     public void toggleUndoRedo(){
         mathDoku.enableDisableUndo(undoStack.empty());
         mathDoku.enableDisableRedo(redoStack.empty());
     }
 
+    /**
+     * Pushes a cell to the redo stack.
+     * 
+     * @param cell Cell to add to the redo stack.
+     */
     public void pushToRedoStack(MathDokuCell cell){
         redoStack.push(cell);
         System.out.println("added to redo stack");
     }
 
+    /**
+     * Pushes a cell to the undo stack.
+     * 
+     * @param cell Cell to add to the undo stack.
+     */
     public void pushToUndoStack(MathDokuCell cell){
         undoStack.push(cell);
         System.out.println("added to undo stack");
     }
 
+    /**
+     * @return The grid dimensions
+     */
     public int getGridDimensions() {
         return this.gridDimensions;
     }
 
+    /**
+     * Sets up the matrix to store references to all the cells in, sets gridDimensions variable.
+     * 
+     * @param gridDimensions The grid dimensions
+     */
     public void setGridDimensions(int gridDimensions) {
         this.gridDimensions = gridDimensions;
         grid = new MathDokuCell[gridDimensions][gridDimensions];
     }
 
+    /**
+     * Returns the currently selected cell.
+     * <p>
+     * Adds the cell to the undo stack, as the only time this method is called is when operations are being done on the cell.
+     * 
+     * @return The currently selected cell.
+     */
     public MathDokuCell getCurrentCell() {
         undoStack.push(currentCell);
         System.out.println("added to undo stack");
         return this.currentCell;
     }
 
+    /**
+     * Checks if the user has begun to play the game.
+     *
+     * @return If the user has selected a cell yet.
+     */
     public boolean hasCurrentCell(){
         return currentCell != null;
     }
 
+    /**
+     * @param currentCell The cell the user has just selected.
+     */
     public void setCurrentStack(MathDokuCell currentCell) {
         this.currentCell = currentCell;
     }
 
+    /**
+     * @return Cell dimensions.
+     */
     public int getCellDimensions() {
         return this.cellDimensions;
     }
 
+    /**
+     * @param cellDimensions The dimensions that the cell should be.
+     */
     public void setCellDimensions(int cellDimensions) {
         this.cellDimensions = cellDimensions;
     }
 
+    /**
+     * @return The previously selected cell.
+     */
     public MathDokuCell getPrevCell() {
         return prevCell;
     }
 
-    public void setPrevCell(MathDokuCell prevStack) {
-        this.prevCell = prevStack;
+    /**
+     * @param prevCell The previously selected cell.
+     */
+    public void setPrevCell(MathDokuCell prevCell) {
+        this.prevCell = prevCell;
     }
 
-    //create grid from ArrayList
+    //TODO: generate solution from this so that in the future auto complete works
+    /**
+     * Creates the grid from an List generated from loading a save.
+     * <p>
+     * Takes the save data and generates a grid from it, allows users to play the same game again and share games with others.
+     * 
+     * @param list A list of save data
+     */
     public void generateFromList(List<String> list) {
-        
+        for (String line : list) {
+            String[] array1 = line.split(" ");
+            String[] targetArray = array1[0].split("");
+            String[] numberArray = array1[1].split(",");
+
+            String targetNumber = "";
+            for (int i = 0; i < targetArray.length-1; i++) {
+                targetNumber += targetArray[i];
+            }
+
+            MathDokuCage cage = new MathDokuCage();
+
+            //add cells to cage
+            for (int i = 0; i < numberArray.length; i++) {
+                Integer num = Integer.parseInt(numberArray[i]);
+                Integer thing1 = num%gridDimensions == 0 ? 5 : num%gridDimensions-1;
+                Integer thing2 = (num-1)/gridDimensions;
+                cage.addCell(grid[thing1][thing2]);
+            }
+
+            cage.setTargetNumber(Integer.parseInt(targetNumber),targetArray[targetArray.length-1]);
+            cages.add(cage);
+        }
+
+        drawCages();
     }
 
-    //create the same grid as specified
+    /**
+     * Generates a default grid if no other options are selected.
+     */
     public void generateDefaultGrid() {
         MathDokuCage cage1 = new MathDokuCage();
         cage1.addCell(grid[0][0]);
@@ -185,14 +277,23 @@ public class MathDokuModel {
         drawCages();
     }
 
+    /**
+     * Undoes the last operation.
+     */
     public void undo(){
         undoStack.pop().undo();
     }
 
+    /**
+     * Redoes the last undone operation.
+     */
     public void redo(){
         redoStack.pop().redo();
     }
 
+    /**
+     * Resets the grid and game back to when the grid was loaded.
+     */
     public void clearAllCells(){
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -204,6 +305,9 @@ public class MathDokuModel {
         toggleUndoRedo();
     }
 
+    /**
+     * Pseudorandomly creates cages, then generates a sodoku solution, then generates target numbers in the cages, turning it into mathdoku.
+     */
     public void generateNewGrid() {
         
         generateCages();
@@ -227,6 +331,9 @@ public class MathDokuModel {
         drawCages();
     }
 
+    /**
+     * Generate a sodoku solution.
+     */
     private void generateGeneralSolution(){
         //generate solution numbers based on normal sudoku rules, taking into account the single cell targets
         //so that check works with solution numbers, we have to setNumber() instead of setSolutionNumber()
@@ -293,7 +400,9 @@ public class MathDokuModel {
 
     }
 
-
+    /**
+     * Pseudorandomly generates a set of cages.
+     */
     private void generateCages() {
         Random rand = new Random();
         int cellsUsed = 0;
@@ -302,15 +411,25 @@ public class MathDokuModel {
 
         while (cellsUsed < maximumCells) {
             //generate new cage from next available cell that isnt already in a cage. Update the cellsUsed count
-            MathDokuCage cageGroup = createCage(usedCellsSet, rand, cellsUsed, maximumCells);
-            cellsUsed += cageGroup.size();
-            cages.add(cageGroup);
+            MathDokuCage cage = createCage(usedCellsSet, rand, cellsUsed, maximumCells);
+            cellsUsed += cage.size();
+            cages.add(cage);
             System.out.println(cellsUsed);
         }
     }
     
+    //TODO: work out if i can remove cellsUsed and use usedCellsSet.size() instead
+    /**
+     * Generate a single cage from unused cells, restricting it's minimum and maximum size.
+     * 
+     * @param usedCellSet The set of cells that have already been used.
+     * @param rand A random seed used to generate the size of the cage.
+     * @param cellsUsed The current number of cells in the cage.
+     * @param maximumCells The number of cells in the entire grid, gridDimensions*gridDimensions.
+     * @return A MathDokuCage with cells in a valid configuration.
+     */
     private MathDokuCage createCage(Set<MathDokuCell> usedCellsSet, Random rand, int cellsUsed, int maximumCells){
-        // Generate random integers in range 1 to gridDimensions inlusive
+        // Generate random integers in range 1 to gridDimensions inclusive
         int numberToAdd;
 
         do {
@@ -341,10 +460,26 @@ public class MathDokuModel {
         return new MathDokuCage();
     }
 
-    //recursively add to cage ahhhhh
-    private MathDokuCage addToCage(int numberToAdd, Set<MathDokuCell> usedCellsSet, MathDokuCage cageGroup, int i, int j, int iToAdd, int jToAdd){
+    /**
+     * Recursively add cells to a single cage, trying to get a pseudorandom pattern of cells.
+     * <p>
+     * The first cell is always unused, so that is successfully added to the cage, guaranteeing at least one cell in the cage.
+     * The actual recursion then begins.
+     * <p>
+     * Mate just work it out, cba to explain recursion
+     * 
+     * @param numberToAdd The amount of cells that this cage should contain.
+     * @param usedCellsSet The set of cells that have already been used.
+     * @param cage The reference to the this cage that is getting cells added.
+     * @param i The x coordinate that is used to find a new cell.
+     * @param j The y coordinate that is used to find a new cell.
+     * @param iToAdd The amount to add to the x coordinate in the next attempt.
+     * @param jToAdd The amount to add to the y coordinate in the next attempt.
+     * @return A MathDokuCage with cells in a valid configuration.
+     */
+    private MathDokuCage addToCage(int numberToAdd, Set<MathDokuCell> usedCellsSet, MathDokuCage cage, int i, int j, int iToAdd, int jToAdd){
         if (numberToAdd == 0){
-            return cageGroup;
+            return cage;
         } else {
             MathDokuCell cell;
             try {
@@ -352,17 +487,22 @@ public class MathDokuModel {
             } catch (ArrayIndexOutOfBoundsException e){
                 //indexes provided are not valid, so begin again at the start of the next row/column
                 //ensure tail recursion by passing everything
+
+                //TODO: just accept it and return the cage
+                return cage;
+                /*
                 if (j >= gridDimensions-1){
-                    return addToCage(numberToAdd, usedCellsSet, cageGroup, i, 0, 1, 0);
+                    return addToCage(numberToAdd, usedCellsSet, cage, i, 0, 1, 0);
                 } else {
-                    return addToCage(numberToAdd, usedCellsSet, cageGroup, 0, j, 0, 1);
+                    return addToCage(numberToAdd, usedCellsSet, cage, 0, j, 0, 1);
                 }
+                */
             }
             
             if (!usedCellsSet.contains(cell)){
                 //update how many cells have been put in the cage
                 usedCellsSet.add(cell);
-                cageGroup.addCell(cell);
+                cage.addCell(cell);
                 //iterate right over 2 cells
                 /*
                     135 etc
@@ -377,14 +517,17 @@ public class MathDokuModel {
                     iToAdd++;
                     jToAdd--;
                 }
-                return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, iToAdd, jToAdd);
+                return addToCage(--numberToAdd, usedCellsSet, cage, i, j, iToAdd, jToAdd);
             }
             //cant use this cell, so search right
             //ensure tail recursion by passing everything
-            return addToCage(--numberToAdd, usedCellsSet, cageGroup, i, j, 1, 0);
+            return addToCage(--numberToAdd, usedCellsSet, cage, i, j, 1, 0);
         }
     }
 
+    /**
+     * Automatically draw the walls for the cages.
+     */
     private void drawCages() {
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -434,22 +577,28 @@ public class MathDokuModel {
         }
     }
 
+    /**
+     * Add cell to matrix.
+     * 
+     * @param cell Cell to add.
+     * @param x X index.
+     * @param y Y index.
+     */
     public void addCell(MathDokuCell cell, int x, int y) {
         grid[x][y] = cell;
     }
 
-    /*
-    public void test(){
-        for (int i = 0; i < gridDimensions; i++) {
-            grid[i][0].highlight(Color.RED);
-        }
-    }
-    */
+    /**
+     * Checks if the cage's math's rules are being followed.
+     * 
+     * @param highlight Whether or not to highlight the cells.
+     * @return If the maths is correct.
+     */
     public boolean checkMaths(boolean highlight){
         boolean check = true;
 
         for (MathDokuCage mathDokuCage : cages) {
-            if (!mathDokuCage.checkMaths()){
+            if (!mathDokuCage.checkMaths(highlight)){
                 check = false;
             }
         }
@@ -457,6 +606,9 @@ public class MathDokuModel {
         return check;
     }
 
+    /**
+     * @return If the cells are filled
+     */
     public boolean checkAllCellsFilled() {
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -469,6 +621,12 @@ public class MathDokuModel {
     }
 
     //TODO: see if this can be made more elegant/efficient/use of the same code in both parts/do all highlighting at the end? (idk if that would actually improve performance or make it worse)
+    /**
+     * Checks the user's answers for row and column conflicts according to sudoku rules.
+     * 
+     * @param highlight Whether or not to highlight the cells according to the user's decision.
+     * @return True if there are no conflicts.
+     */
     public boolean check(boolean highlight){
         //have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
@@ -537,6 +695,11 @@ public class MathDokuModel {
     }
 
     //TODO: idk try to merge with above, not likely to happen tbh
+    /**
+     * Checks the solution numbers for row and column conflicts according to sudoku rules, does not highlight.
+     * 
+     * @return True there are no conflicts.
+     */
     public boolean checkSolutions(){
         //have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;

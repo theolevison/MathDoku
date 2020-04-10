@@ -1,5 +1,6 @@
 package app;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -26,6 +27,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 
+
+/**
+ * Handles creating the GUI and running the game of MathDoku, extends Application.
+ * <p>
+ * All other classes are instansiated here.
+ * 
+ * @author Theo Levison
+ */
 public class MathDoku extends Application {
     // use mathDukoController to store everything like prevStacks, dimensions etc
     private MathDokuModel mathDokuModel = new MathDokuModel(this);
@@ -33,14 +42,33 @@ public class MathDoku extends Application {
     private Button redoButton;
     private int gridDimensions;
 
+    /**
+     * Allows the user to press the undo button if there are operations in the undo stack.
+     * 
+     * @param bool If the undo button should be enabled or not
+     */
     public void enableDisableUndo(boolean bool){
         undoButton.setDisable(bool);
     }
 
+    /**
+     * Allows the user to press the redo button if there are operations in the redo stack.
+     * 
+     * @param bool If the redo button should be enabled or not
+     */
     public void enableDisableRedo(boolean bool){
         redoButton.setDisable(bool);
     }
 
+    /**
+     * Start method for javaFX that sets up the GUI and begins the game.
+     * <p>
+     * Instansiates the GUI with buttons and grid and contains all the method handlers for each button.
+     * I've tried to keep all javaFX components only accessable through this, exceptions include MathDokuCell and MathDokuCanvas.
+     * Is called by javaFX once the launch method has been called.
+     * 
+     * @param stage A javaFX object that represents the GUI, all javaFX objects must be added to it.
+     */
     @Override
     public void start(Stage stage) {
 
@@ -91,8 +119,24 @@ public class MathDoku extends Application {
         loadOptionsHBox.setAlignment(Pos.CENTER);
         loadOptionsHBox.setSpacing(10);
 
+        /**
+         * Lets the user select save files and if valid, loads the resulting grid to the GUI.
+         * <p>
+         * Ensures that the save file is in the correct format and that cages are valid.
+         * 
+         * @author Theo Levison
+         */
         class LoadFileEventHandler implements EventHandler<ActionEvent> {
 
+            /**
+             * Handles the user pressing the load file button by generating a file load dialog.
+             * <p>
+             * Checks the file selected by the user for formatting and valid cages, if the file is erroneous a warning dialog is generated and the system resets.
+             * If the file is valid then the save is loaded into the grid.
+             * The user is able to close the dialog if they no longer want to load a save.
+             * 
+             * @param arg0 an ActionEvent, not actually used for anything.
+             */
             @Override
             public void handle(ActionEvent arg0) {
                 FileChooser fileChooser = new FileChooser();
@@ -107,7 +151,7 @@ public class MathDoku extends Application {
                         String tempString;
                         String text = "";
                         while ((tempString = br.readLine()) != null){
-                            list.add(tempString + System.lineSeparator());
+                            list.add(tempString);
                             text += tempString + System.lineSeparator();
                         }
 
@@ -137,8 +181,26 @@ public class MathDoku extends Application {
             }
         }
 
+        /**
+         * Asks the user for a text based save, if valid, loads the resulting grid to the GUI.
+         * <p>
+         * Generates a dialog that has a text box for the user to enter text.
+         * Ensures that the text provided is in the correct format and that cages are valid.
+         * The user is unable to load the save until it matches the correct format.
+         * 
+         * @author Theo Levison
+         */
         class LoadTextEventHandler implements EventHandler<ActionEvent> {
 
+            /**
+             * Handles the user pressing the load text button by generating a text based save load dialog.
+             * <p>
+             * Checks the text given by the user for formatting and valid cages, if the text is erroneous the user is unable to load the save.
+             * If the text is valid then the save is loaded into the grid.
+             * The user is able to close the dialog if they no longer want to load a save.
+             * 
+             * @param arg0 An ActionEvent, not actually used for anything.
+             */
             @Override
             public void handle(ActionEvent arg0) {
                 Dialog<String> textDialog = new Dialog<String>();
@@ -210,8 +272,18 @@ public class MathDoku extends Application {
         clearHBox.setAlignment(Pos.CENTER);
         clearHBox.setSpacing(10);
 
+        /**
+         * Checks if the user wants to clear the grid.
+         * 
+         * @author Theo Levison
+         */
         class ClearButtonEventHandler implements EventHandler<ActionEvent> {
 
+             /**
+             * Generates a confirmation dialog that asks the user if they want to clear the grid.
+             * 
+             * @param arg0 An ActionEvent, not actually used for anything.
+             */
             @Override
             public void handle(ActionEvent arg0) {
                 // ask the user for confirmation
@@ -250,15 +322,24 @@ public class MathDoku extends Application {
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
 
+        /**
+         * Lets the user press a button to enter numbers into the grid.
+         * 
+         * @author Theo Levison
+         */
         class NumberButtonEventHandler implements EventHandler<ActionEvent> {
 
+            /**
+             * Handles the user pressing a number button to enter numbers into the grid.
+             * 
+             * @param arg0 An ActionEvent, used to find the number the user wants to enter into the grid.
+             */
             @Override
             public void handle(ActionEvent arg0) {
                 if (mathDokuModel.hasCurrentCell()){
                     EventTarget target = arg0.getTarget();
 
                     //get the text from the button
-                    //TODO: try to git rid of casting please, maybe put numberButtons in its own class
                     if (target instanceof Button){
                         Button button = (Button) arg0.getTarget();
                         mathDokuModel.getCurrentCell().updateNumber(button.getText());
@@ -302,12 +383,22 @@ public class MathDoku extends Application {
         }
 
         //TODO: allow the user to use arow keys to switch cells (longterm)
+        /**
+         * Lets the user press keys to enter and remove numbers in the grid.
+         * 
+         * @author Theo Levison
+         */
         class KeyboardInputEventHandler implements EventHandler<KeyEvent> {
 
+            /**
+             * Handles the user press a key to enter numbers into the grid.
+             * 
+             * @param arg0 An KeyEvent, used to find the number/command the user wants to enter into the grid.
+             */
             @Override
             public void handle(KeyEvent arg0) {
                 if (mathDokuModel.hasCurrentCell()){
-                    //mathDokuModel.getCurrentStack().updateNumber(arg0.getText());
+                    //check if they want to delete or enter a number
                     if (arg0.getCode() == KeyCode.BACK_SPACE) {
                         mathDokuModel.getCurrentCell().updateNumber("delete");
                     } else {
@@ -316,7 +407,7 @@ public class MathDoku extends Application {
                             Integer.parseInt(arg0.getText());
                             mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
                         } catch (NumberFormatException e) {
-                            //Someone tried to type a letter what a fool
+                            //Someone tried to type something that isn't a number or delete, ignore it
                         }
                     }
                 }
@@ -333,7 +424,7 @@ public class MathDoku extends Application {
 
         //TODO: make this read a button toggle or something, make a lil menu to load from file, default or generate randomly
         if (true){
-            mathDokuModel.generateDefaultGrid();
+            //mathDokuModel.generateDefaultGrid();
         } else {
             mathDokuModel.generateNewGrid();
         }
@@ -351,15 +442,23 @@ public class MathDoku extends Application {
         stage.show();
     }
 
-    private VBox[] generateSquares(int n) {
+    /**
+     * Generates the grid of MathDokuCells.
+     * <p>
+     * Adds each cell to a matrix in mathDokuModel.
+     * 
+     * @param dimensions The gridDimensions that are used to create the right amount of cells.
+     * @return An array of VBoxes full of cells
+     */
+    private VBox[] generateSquares(int dimensions) {
 
-        VBox[] listOfVBoxes = new VBox[n];
-        for (int i = 0; i < n; i++) {
+        VBox[] listOfVBoxes = new VBox[dimensions];
+        for (int i = 0; i < dimensions; i++) {
             VBox vBox = new VBox();
             vBox.setAlignment(Pos.CENTER);
             vBox.setSpacing(0);
 
-            for (int j = 0; j < n; j++) {
+            for (int j = 0; j < dimensions; j++) {
                 MathDokuCell cell = new MathDokuCell(mathDokuModel);
                 vBox.getChildren().add(cell);
                 mathDokuModel.addCell(cell, i, j);
@@ -370,7 +469,14 @@ public class MathDoku extends Application {
         return listOfVBoxes;
     }
 
-    //checks if format of text is incorrect
+    /**
+     * Checks if format of saves are incorrect.
+     * <p>
+     * If the load attempt is successful then gridDimensions are updated.
+     * 
+     * @param text The save that the user is attempting to load.
+     * @return If the save is invalid
+     */
     private boolean isInvalid(String text){
         //first get the square root of the highest number to get dimensions
         List<Integer[]> allNumbersList = new ArrayList<Integer[]>();
@@ -435,10 +541,11 @@ public class MathDoku extends Application {
                     highestNumber = integer >= highestNumber ? integer : highestNumber;
                 }
             }
-            //update grid dimensions
+
+            //find new grid dimensions
             //this part only works once all cells have been typed out and the highest number is a valid grid dimension
-            gridDimensions = (int)Math.floor(Math.sqrt(highestNumber));
-            System.out.println(gridDimensions);
+            Integer tempGridDimensions = (int)Math.floor(Math.sqrt(highestNumber));
+            System.out.println(tempGridDimensions);
 
             //check cages are valid
             for (Integer[] list : allNumbersList) {
@@ -448,7 +555,7 @@ public class MathDoku extends Application {
                     boolean check = true;
                     for (int j = i+1; j < list.length; j++) {
                         Integer cell2 = list[j];
-                        if (cell1 == cell2-1 || cell1 == cell2-gridDimensions){
+                        if (cell1 == cell2-1 || cell1 == cell2-tempGridDimensions){
                         check = false;
                         }
                     }
@@ -458,6 +565,8 @@ public class MathDoku extends Application {
                 }
             }
 
+            //save will be loaded so now update gridDimensions
+            gridDimensions = tempGridDimensions;
             return false;
         } catch (IndexOutOfBoundsException e) {
             return true;

@@ -4,25 +4,33 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+/**
+ * Handles drawing the cage walls and resizing the canvas.
+ * 
+ * @author Theo Levison
+ */
 public class MathDokuCanvas extends Canvas {
     private boolean[] cageWalls = {false, false, false, false};
     private Color defaultColor = Color.GREY;
     private boolean isSelected = false;
 
-    public MathDokuCanvas(MathDokuModel mathDokuModel){
-        //int dimensions = mathDokuModel.getCellDimensions();
-
-        //setup the canvas for drawing
-        //GraphicsContext gc = getGraphicsContext2D();
-
-        //gc.strokeRect(0, 0, dimensions, dimensions);
-
+    /**
+     * Constructor, adds listeners to width and height that allow the canvas to resize as the cell does.
+     */
+    public MathDokuCanvas(){
         widthProperty().addListener(evt -> draw());
         heightProperty().addListener(evt -> draw());
     }
 
+    /**
+     * Set the cage walls to be filled in or not.
+     * 
+     * @param index Which wall do you want to fill. 0 is bottom. 1 is left. 2 is top. 3 is right.
+     * @param toggle Should the wall be filled or not
+     */
     public void setCageWall(int index, boolean toggle) {
         cageWalls[index] = toggle;
+        draw();
     }
 
     @Override
@@ -40,26 +48,42 @@ public class MathDokuCanvas extends Canvas {
       return getHeight();
     }
 
-    //update highlight color
+    /**
+     * Color the cell whatever you want
+     * 
+     * @param color Choose which javaFX color you want the cell to be.
+     */
     public void highlight(Color color) {
         defaultColor = color;
         //redraw canvas with correct highlighting
         draw();
     }
 
+    /**
+     * The user has stopped selecting this cell so unhighlight, returning to the cell's previous color.
+     */
     public void unhighlight() {
         isSelected = false;
         //redraw canvas with correct highlighting
         draw();
     }
 
+    /**
+     * The cell has been selected by the user so highlight it yellow.
+     * <p>
+     * Doesn't overwrite the error highlighting, so once the cell is unselected it returns to the previous color.
+     */
     public void selectHighlight(){
         isSelected = true;
         //redraw canvas with correct highlighting
         draw();
     }
 
-    //everything you want to draw put in here
+    /**
+     * Redraws the canvas.
+     * <p>
+     * Should be called after any update to the cell so that it is displayed to the user.
+     */
     private void draw() {
         double width = getWidth();
         double height = getHeight();
