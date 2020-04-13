@@ -162,7 +162,7 @@ public class MathDokuModel {
             //add cells to cage
             for (int i = 0; i < numberArray.length; i++) {
                 Integer num = Integer.parseInt(numberArray[i]);
-                Integer thing1 = num%gridDimensions == 0 ? 5 : num%gridDimensions-1;
+                Integer thing1 = num%gridDimensions == 0 ? gridDimensions-1 : num%gridDimensions-1;
                 Integer thing2 = (num-1)/gridDimensions;
                 cage.addCell(grid[thing1][thing2]);
             }

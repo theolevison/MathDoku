@@ -1,6 +1,5 @@
 package app;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -26,6 +25,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 
 
 /**
@@ -61,10 +61,9 @@ public class MathDoku extends Application {
     }
 
     /**
-     * Start method for javaFX that sets up the GUI and begins the game.
+     * Start method for javaFX that sets up the GUI and gets the user to select a game.
      * <p>
-     * Instansiates the GUI with buttons and grid and contains all the method handlers for each button.
-     * I've tried to keep all javaFX components only accessable through this, exceptions include MathDokuCell and MathDokuCanvas.
+     * Handles loading games from saves.
      * Is called by javaFX once the launch method has been called.
      * 
      * @param stage A javaFX object that represents the GUI, all javaFX objects must be added to it.
@@ -72,50 +71,22 @@ public class MathDoku extends Application {
     @Override
     public void start(Stage stage) {
 
-        // TODO: let the user specify dimensions, or use default of 6
-        if (false) {
+        //setup title page
+        Text title = new Text (10, 20, "MathDoku");
+        title.setId("title");
 
-        } else {
-            gridDimensions = 6;
-        }
-
-        mathDokuModel.setCellDimensions(60);
-        mathDokuModel.setGridDimensions(gridDimensions);
-
-        GridPane root = new GridPane();
-        root.setAlignment(Pos.CENTER);
-        root.setHgap(10);
-        root.setVgap(10);
-        root.setPadding(new Insets(10, 10, 10, 10));
-
-        // undo redo buttons
-        HBox undoRedoHBox = new HBox();
-        undoButton = new Button("Undo");
-        redoButton = new Button("Redo");
-        undoButton.setMaxWidth(Double.MAX_VALUE);
-        redoButton.setMaxWidth(Double.MAX_VALUE);
-        undoButton.setMaxHeight(Double.MAX_VALUE);
-        redoButton.setMaxHeight(Double.MAX_VALUE);
-        undoRedoHBox.getChildren().addAll(undoButton, redoButton);
-        undoRedoHBox.setAlignment(Pos.CENTER);
-        undoRedoHBox.setSpacing(10);
-
-        undoButton.setOnAction(e -> mathDokuModel.undo());
-        redoButton.setOnAction(e -> mathDokuModel.redo());
-
-        undoButton.setDisable(true);
-        redoButton.setDisable(true);
-
-
-        // load option buttons
+        //load option buttons
         HBox loadOptionsHBox = new HBox();
         Button loadFileButton = new Button("Load from file");
         Button loadTextButton = new Button("Load from text");
+        Button autoGenerateButton = new Button("Generate new game");
         loadFileButton.setMaxWidth(Double.MAX_VALUE);
         loadTextButton.setMaxWidth(Double.MAX_VALUE);
+        autoGenerateButton.setMaxWidth(Double.MAX_VALUE);
+        autoGenerateButton.setMaxHeight(Double.MAX_VALUE);
         loadFileButton.setMaxHeight(Double.MAX_VALUE);
         loadTextButton.setMaxHeight(Double.MAX_VALUE);
-        loadOptionsHBox.getChildren().addAll(loadFileButton, loadTextButton);
+        loadOptionsHBox.getChildren().addAll(loadFileButton, loadTextButton, autoGenerateButton);
         loadOptionsHBox.setAlignment(Pos.CENTER);
         loadOptionsHBox.setSpacing(10);
 
@@ -172,8 +143,10 @@ public class MathDoku extends Application {
                             return;
                         }
 
-                        //send the list of cages to mathDokuModel
-                        mathDokuModel.generateFromList(list);
+                        //update dimensions and start the main game
+                        mathDokuModel.setCellDimensions(60);
+                        mathDokuModel.setGridDimensions(gridDimensions);
+                        startMainGame(stage, list);
                     } catch (Exception e) {
                         
                     }
@@ -254,7 +227,10 @@ public class MathDoku extends Application {
                         list.add(line);
                     }
                     
-                    mathDokuModel.generateFromList(list);
+                    //update dimensions and start the main game
+                    mathDokuModel.setCellDimensions(60);
+                    mathDokuModel.setGridDimensions(gridDimensions);
+                    startMainGame(stage, list);
                 });
                 
             }
@@ -263,11 +239,78 @@ public class MathDoku extends Application {
         loadFileButton.setOnAction(new LoadFileEventHandler());
         loadTextButton.setOnAction(new LoadTextEventHandler());
 
+        autoGenerateButton.setOnAction(e -> {
+            gridDimensions = 6;
+            mathDokuModel.setCellDimensions(60);
+            mathDokuModel.setGridDimensions(gridDimensions);
+            startMainGame(stage, new ArrayList<String>());
+        });
+
+        //set title scene
+        GridPane titleRoot = new GridPane();
+        titleRoot.setAlignment(Pos.CENTER);
+        titleRoot.setHgap(10);
+        titleRoot.setVgap(10);
+        titleRoot.setPadding(new Insets(10, 10, 10, 10));
+
+        titleRoot.add(title, 0, 0, 1, 1);
+        titleRoot.add(loadOptionsHBox, 0, 1, 1, 1);
+
+        Scene titleScene = new Scene(titleRoot,950,700);
+        
+        titleScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+
+        stage.setScene(titleScene);
+        stage.setTitle("MathDoku");
+
+        stage.show();
+
+
+        
+    }
+
+    /**
+     * Start method for javaFX that sets up the GUI and begins the game.
+     * <p>
+     * Instansiates the GUI with buttons and grid and contains all the method handlers for each button.
+     * I've tried to keep all javaFX components only accessable through this, exceptions include MathDokuCell and MathDokuCanvas.
+     * Is called by javaFX once the launch method has been called.
+     * 
+     * @param stage A javaFX object that represents the GUI, all javaFX objects must be added to it.
+     * @param list The list of grid cages that should be loaded.
+     */
+    public void startMainGame(Stage stage, List<String> list) {
+
+        GridPane root = new GridPane();
+        root.setAlignment(Pos.CENTER);
+        root.setHgap(10);
+        root.setVgap(10);
+        root.setPadding(new Insets(10, 10, 10, 10));
+
+        // undo redo buttons
+        HBox undoRedoHBox = new HBox();
+        undoButton = new Button("Undo");
+        redoButton = new Button("Redo");
+        undoButton.setMaxWidth(Double.MAX_VALUE);
+        redoButton.setMaxWidth(Double.MAX_VALUE);
+        undoButton.setMaxHeight(Double.MAX_VALUE);
+        redoButton.setMaxHeight(Double.MAX_VALUE);
+        undoRedoHBox.getChildren().addAll(undoButton, redoButton);
+        undoRedoHBox.setAlignment(Pos.CENTER);
+        undoRedoHBox.setSpacing(10);
+
+        undoButton.setOnAction(e -> mathDokuModel.undo());
+        redoButton.setOnAction(e -> mathDokuModel.redo());
+
+        undoButton.setDisable(true);
+        redoButton.setDisable(true);
+
+
         // clear button
         HBox clearHBox = new HBox();
         Button clearButton = new Button("Clear");
-        loadFileButton.setMaxWidth(Double.MAX_VALUE);
-        loadTextButton.setMaxHeight(Double.MAX_VALUE);
+        clearButton.setMaxWidth(Double.MAX_VALUE);
+        clearButton.setMaxHeight(Double.MAX_VALUE);
         clearHBox.getChildren().addAll(clearButton);
         clearHBox.setAlignment(Pos.CENTER);
         clearHBox.setSpacing(10);
@@ -318,7 +361,7 @@ public class MathDoku extends Application {
 
         //button box
         VBox buttonVBox = new VBox();
-        buttonVBox.getChildren().addAll(undoRedoHBox, loadOptionsHBox, clearHBox, showMistakesHBox);
+        buttonVBox.getChildren().addAll(undoRedoHBox, clearHBox, showMistakesHBox);
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
 
@@ -414,7 +457,6 @@ public class MathDoku extends Application {
             }
         }
 
-
         root.setOnKeyPressed(new KeyboardInputEventHandler());
 
         //add grid and buttons to GridPane
@@ -422,11 +464,17 @@ public class MathDoku extends Application {
         root.add(gridHBox, 2, 0, 1, 1);
         root.add(buttonVBox, 4, 0, 1, 1);
 
-        //TODO: make this read a button toggle or something, make a lil menu to load from file, default or generate randomly
-        if (true){
+        //fill grid here
+
+        //TODO: let mathDokuModel make the decision which one to generate by passing in list
+        
+
+        if (list.isEmpty()){
+            //generate random
             //mathDokuModel.generateDefaultGrid();
-        } else {
             mathDokuModel.generateNewGrid();
+        } else {
+            mathDokuModel.generateFromList(list);
         }
 
         Scene scene = new Scene(root,950,700);
@@ -534,18 +582,26 @@ public class MathDoku extends Application {
             }
             
             Integer highestNumber = 0;
+            Integer count = 0;
             
             for (Integer[] list : allNumbersList) {
                 for (Integer integer : list) {
                     //update highest number
+                    count++;
                     highestNumber = integer >= highestNumber ? integer : highestNumber;
                 }
             }
 
             //find new grid dimensions
             //this part only works once all cells have been typed out and the highest number is a valid grid dimension
-            Integer tempGridDimensions = (int)Math.floor(Math.sqrt(highestNumber));
-            System.out.println(tempGridDimensions);
+            Double tempGridDimensions = Math.sqrt(highestNumber);
+
+            //check it is a square and that the highest number matches the dimensions
+            if (Math.floor(Math.sqrt(count)) == tempGridDimensions){
+                System.out.println(tempGridDimensions);
+            } else {
+                return true;
+            }
 
             //check cages are valid
             for (Integer[] list : allNumbersList) {
@@ -566,7 +622,7 @@ public class MathDoku extends Application {
             }
 
             //save will be loaded so now update gridDimensions
-            gridDimensions = tempGridDimensions;
+            gridDimensions = (int)Math.floor(tempGridDimensions);
             return false;
         } catch (IndexOutOfBoundsException e) {
             return true;
