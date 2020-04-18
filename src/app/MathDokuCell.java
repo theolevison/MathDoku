@@ -1,11 +1,15 @@
 package app;
 
 import java.util.Stack;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -33,6 +37,24 @@ public class MathDokuCell extends StackPane{
     private int solutionNumber;
     private Stack<String> undoStack = new Stack<String>();
     private Stack<String> redoStack = new Stack<String>();
+    private DoubleProperty realWidth = new SimpleDoubleProperty(30);
+ 
+    // To get around stack pane not resizing use a property I can bind to and then bind off of
+    // Define all that is needed for that
+    public final double getRealWidth(){return realWidth.get();}
+ 
+    public final void setRealWidth(double value){realWidth.set(value);}
+ 
+    public DoubleProperty realWidthProperty() {return realWidth;}
+
+    // Do the same for height
+    private DoubleProperty realHeight = new SimpleDoubleProperty();
+  
+    public final double getRealHeight(){return realHeight.get();}
+ 
+    public final void setRealHeight(double value){realHeight.set(value);}
+ 
+    public DoubleProperty realHeightProperty() {return realHeight;}
 
     /**
      * @param solutionNumber A number that is part of a solution to the math doku.
@@ -178,13 +200,20 @@ public class MathDokuCell extends StackPane{
         int dimensions = mathDokuModel.getCellDimensions();
 
         //do resizable canvas
-        //TODO: change panes so that canvas can actually resize as the window does. I think after that it should work
         mathDokuCanvas = new MathDokuCanvas();
         getChildren().add(mathDokuCanvas);
  
         // Bind canvas size to stack pane size.
-        mathDokuCanvas.widthProperty().bind(MathDokuCell.this.widthProperty());
-        mathDokuCanvas.heightProperty().bind(MathDokuCell.this.heightProperty());
+        mathDokuCanvas.widthProperty().bind(realWidthProperty());
+        mathDokuCanvas.heightProperty().bind(realHeightProperty());
+        
+        /*
+        realWidthProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println(realWidthProperty());
+            System.out.println(prefWidthProperty());
+            System.out.println(mathDokuCanvas.widthProperty());
+        });
+        */
 
 
         //setup main number label and targetNumber
@@ -192,8 +221,18 @@ public class MathDokuCell extends StackPane{
         mainNumber.setFont(new Font("Arial", dimensions / 2));
         mainNumber.setStyle("-fx-font-weight: bold");
         mainNumber.setMaxWidth(dimensions);
+
+        //TODO: add listener to change font size
+        //mainNumber.prefWidthProperty().bind(realWidthProperty());
+        //mainNumber.prefHeightProperty().bind(realHeightProperty());
+
         targetNumber = new Label("12+");
         targetNumber.setFont(new Font("Arial", dimensions / 6));
+
+        //TODO: add listener to change font size
+
+        //targetNumber.prefWidthProperty().bind(realWidthProperty());
+        //targetNumber.prefHeightProperty().bind(realHeightProperty());
 
         //add all nodes to the stack
         getChildren().addAll(mainNumber, targetNumber);

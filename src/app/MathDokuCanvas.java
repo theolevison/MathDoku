@@ -91,17 +91,6 @@ public class MathDokuCanvas extends Canvas {
         GraphicsContext gc = getGraphicsContext2D();
         gc.clearRect(0, 0, width, height);
 
-        //Make cell boundary
-        //gc.setStroke(Color.BLACK);
-        //gc.setLineWidth(0.0);
-        //gc.strokeRect(0, 0, width, height);
-
-        /*
-        gc.setStroke(Color.RED);
-        gc.strokeLine(0, 0, width, height);
-        gc.strokeLine(0, height, width, 0);
-        */
-
         if (isSelected){
             gc.setFill(Color.YELLOW);
         } else {

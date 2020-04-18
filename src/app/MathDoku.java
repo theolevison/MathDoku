@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +43,12 @@ public class MathDoku extends Application {
     private Button redoButton;
     private int gridDimensions;
 
+    private final int MAIN_WINDOW_WIDTH = 650;
+    private final int MAIN_WINDOW_HEIGHT = 500;
+
+    private final int TITLE_WINDOW_WIDTH = 950;
+    private final int TITLE_WINDOW_HEIGHT = 700;
+
     /**
      * Allows the user to press the undo button if there are operations in the undo stack.
      * 
@@ -71,6 +78,9 @@ public class MathDoku extends Application {
     @Override
     public void start(Stage stage) {
 
+        
+        //TODO: add slider to select grid dimensions when generating a random game
+
         //setup title page
         Text title = new Text (10, 20, "MathDoku");
         title.setId("title");
@@ -89,6 +99,13 @@ public class MathDoku extends Application {
         loadOptionsHBox.getChildren().addAll(loadFileButton, loadTextButton, autoGenerateButton);
         loadOptionsHBox.setAlignment(Pos.CENTER);
         loadOptionsHBox.setSpacing(10);
+
+        loadOptionsHBox.setMaxHeight(100);
+        loadOptionsHBox.setMaxWidth(TITLE_WINDOW_WIDTH);
+
+        //loadOptionsHBox.setPrefSize(window_width, window_height);
+        //loadOptionsHBox.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
 
         /**
          * Lets the user select save files and if valid, loads the resulting grid to the GUI.
@@ -247,26 +264,33 @@ public class MathDoku extends Application {
         });
 
         //set title scene
+
         GridPane titleRoot = new GridPane();
         titleRoot.setAlignment(Pos.CENTER);
         titleRoot.setHgap(10);
         titleRoot.setVgap(10);
         titleRoot.setPadding(new Insets(10, 10, 10, 10));
+        
+        titleRoot.setPrefSize(TITLE_WINDOW_WIDTH*0.6, TITLE_WINDOW_HEIGHT*0.6);
+        titleRoot.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
+        stage.setMinHeight(300);
+        stage.setMinWidth(650);
 
         titleRoot.add(title, 0, 0, 1, 1);
         titleRoot.add(loadOptionsHBox, 0, 1, 1, 1);
 
-        Scene titleScene = new Scene(titleRoot,950,700);
+        Scene titleScene = new Scene(titleRoot,TITLE_WINDOW_WIDTH,TITLE_WINDOW_HEIGHT);
         
+        //stage.minWidthProperty().bind(titleScene.heightProperty().multiply(1.5));
+        //stage.minHeightProperty().bind(titleScene.widthProperty().divide(1.5));
+
         titleScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
 
         stage.setScene(titleScene);
         stage.setTitle("MathDoku");
 
         stage.show();
-
-
-        
     }
 
     /**
@@ -285,16 +309,18 @@ public class MathDoku extends Application {
         root.setAlignment(Pos.CENTER);
         root.setHgap(10);
         root.setVgap(10);
-        root.setPadding(new Insets(10, 10, 10, 10));
+        root.setPadding(new Insets(40, 40, 40, 40));
 
         // undo redo buttons
         HBox undoRedoHBox = new HBox();
         undoButton = new Button("Undo");
         redoButton = new Button("Redo");
+        /*
         undoButton.setMaxWidth(Double.MAX_VALUE);
         redoButton.setMaxWidth(Double.MAX_VALUE);
         undoButton.setMaxHeight(Double.MAX_VALUE);
         redoButton.setMaxHeight(Double.MAX_VALUE);
+        */
         undoRedoHBox.getChildren().addAll(undoButton, redoButton);
         undoRedoHBox.setAlignment(Pos.CENTER);
         undoRedoHBox.setSpacing(10);
@@ -305,6 +331,21 @@ public class MathDoku extends Application {
         undoButton.setDisable(true);
         redoButton.setDisable(true);
 
+        /*
+        undoRedoHBox.heightProperty().addListener((observable, oldValue, newValue) -> {
+            undoButton.prefHeight((double)newValue);
+            redoButton.prefHeight((double)newValue);
+        });
+
+        undoRedoHBox.widthProperty().addListener((observable, oldValue, newValue) -> {
+            undoButton.prefWidth((double)newValue);
+            redoButton.prefWidth((double)newValue);
+        });
+        */
+
+        //undoRedoHBox.prefWidthProperty().bind(root.widthProperty());
+        undoRedoHBox.setMinWidth(150);
+        //undoRedoHBox.prefHeightProperty().bind(root.heightProperty());
 
         // clear button
         HBox clearHBox = new HBox();
@@ -314,6 +355,9 @@ public class MathDoku extends Application {
         clearHBox.getChildren().addAll(clearButton);
         clearHBox.setAlignment(Pos.CENTER);
         clearHBox.setSpacing(10);
+
+        //clearHBox.prefWidthProperty().bind(root.widthProperty());
+        //clearHBox.prefHeightProperty().bind(root.heightProperty());
 
         /**
          * Checks if the user wants to clear the grid.
@@ -359,11 +403,18 @@ public class MathDoku extends Application {
         showMistakesHBox.setAlignment(Pos.CENTER);
         showMistakesHBox.setSpacing(10);
 
+        //showMistakesHBox.prefWidthProperty().bind(root.widthProperty());
+        //showMistakesHBox.prefHeightProperty().bind(root.heightProperty());
+
         //button box
         VBox buttonVBox = new VBox();
         buttonVBox.getChildren().addAll(undoRedoHBox, clearHBox, showMistakesHBox);
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
+
+        //buttonVBox.prefWidthProperty().bind(root.widthProperty());
+        //buttonVBox.prefWidth(30);
+        //buttonVBox.prefHeightProperty().bind(root.heightProperty());
 
         /**
          * Lets the user press a button to enter numbers into the grid.
@@ -398,32 +449,57 @@ public class MathDoku extends Application {
         VBox numberButtonsVBox = new VBox();
         numberButtonsVBox.setAlignment(Pos.CENTER);
         numberButtonsVBox.setSpacing(10);
+
+        //numberButtonsVBox.prefWidthProperty().bind(root.widthProperty());
+        //numberButtonsVBox.prefWidth(30);
+        //numberButtonsVBox.prefHeightProperty().bind(root.heightProperty());
+
         //ensure that only number buttons appear that are valid for the gridDimensions
         for (int i = 1; i < 10 && i <= gridDimensions; i++) {
             Button button = new Button(Integer.toString(i));
-            button.setMaxWidth(Double.MAX_VALUE);
-            button.setMaxHeight(Double.MAX_VALUE);
+            button.setMaxWidth(30);
+            button.setMaxHeight(30);
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
         if (gridDimensions > 9){
             Button button = new Button("0");
-            button.setMaxWidth(Double.MAX_VALUE);
-            button.setMaxHeight(Double.MAX_VALUE);
+            button.setMaxWidth(30);
+            button.setMaxHeight(30);
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
 
-        //grid box
-        HBox gridHBox = new HBox();
-        gridHBox.setAlignment(Pos.CENTER);
-        gridHBox.setSpacing(0);
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(0);
+        grid.setVgap(0);
+        grid.setPadding(new Insets(10, 10, 10, 10));
 
-        //generate VBoxes and fill out the HBox with them
-        VBox[] vboxArray = generateSquares(gridDimensions);
-        for (int i = 0; i < vboxArray.length; i++) {
-            gridHBox.getChildren().add(vboxArray[i]);
+        //Generates the grid of MathDokuCells.
+        //Adds each cell to a matrix in mathDokuModel.
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                MathDokuCell cell = new MathDokuCell(mathDokuModel);
+
+                grid.add(cell, i, j, 1, 1);
+                mathDokuModel.addCell(cell, i, j);
+
+                //Bind canvas size to stack pane size.
+                grid.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
+                    cell.setRealWidth((double)newValue/grid.getColumnCount());
+                });
+        
+                grid.prefHeightProperty().addListener((observable, oldValue, newValue) -> {
+                    cell.setRealHeight((double)newValue/grid.getRowCount());
+                });
+            }
         }
+
+        //Bind grid size to parent grid size.
+        grid.prefWidthProperty().bind(root.prefWidthProperty());
+        grid.prefHeightProperty().bind(root.prefHeightProperty());
+        
 
         //TODO: allow the user to use arow keys to switch cells (longterm)
         /**
@@ -459,10 +535,20 @@ public class MathDoku extends Application {
 
         root.setOnKeyPressed(new KeyboardInputEventHandler());
 
+        /*
+        //grid box
+        HBox numberAndGridHBox = new HBox();
+        numberAndGridHBox.setAlignment(Pos.CENTER);
+        numberAndGridHBox.setSpacing(0);
+
+        numberAndGridHBox.getChildren().addAll(numberButtonsVBox, gridHBox);
+        */
+
         //add grid and buttons to GridPane
         root.add(numberButtonsVBox, 0, 0, 1, 1);
-        root.add(gridHBox, 2, 0, 1, 1);
-        root.add(buttonVBox, 4, 0, 1, 1);
+        root.add(grid, 1, 0, 1, 1);
+        //root.add(numberAndGridHBox, 0, 0, 1, 1);
+        root.add(buttonVBox, 2, 0, 1, 1);
 
         //fill grid here
 
@@ -477,44 +563,29 @@ public class MathDoku extends Application {
             mathDokuModel.generateFromList(list);
         }
 
-        Scene scene = new Scene(root,950,700);
-        //scene.getStylesheets().add("/style.css");
-        //new FileInputStream("style.css");
-        //String stylesheet = getClass().getResource("style.css").toExternalForm();
-        //stylesheet = new FileInputStream("style.css");
+        Scene scene = new Scene(root,MAIN_WINDOW_WIDTH,MAIN_WINDOW_HEIGHT);
+        
+        stage.setMinHeight(MAIN_WINDOW_HEIGHT);
+        stage.setMinWidth(MAIN_WINDOW_WIDTH);
+        
+        //Bind main grid to window size.
+        root.prefWidthProperty().bind(scene.widthProperty());
+        root.prefHeightProperty().bind(scene.heightProperty());
+
+        /*
+        root.widthProperty().addListener(e -> {
+            System.out.println("1 " + grid.widthProperty());
+            System.out.println("2 " + root.widthProperty());
+        });
+        */
+
         scene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
-        //scene.getStylesheets().addAll(this.getClass().getResource("style.css").toExternalForm());
+        
         stage.setScene(scene);
         stage.setTitle("MathDoku");
 
+
         stage.show();
-    }
-
-    /**
-     * Generates the grid of MathDokuCells.
-     * <p>
-     * Adds each cell to a matrix in mathDokuModel.
-     * 
-     * @param dimensions The gridDimensions that are used to create the right amount of cells.
-     * @return An array of VBoxes full of cells
-     */
-    private VBox[] generateSquares(int dimensions) {
-
-        VBox[] listOfVBoxes = new VBox[dimensions];
-        for (int i = 0; i < dimensions; i++) {
-            VBox vBox = new VBox();
-            vBox.setAlignment(Pos.CENTER);
-            vBox.setSpacing(0);
-
-            for (int j = 0; j < dimensions; j++) {
-                MathDokuCell cell = new MathDokuCell(mathDokuModel);
-                vBox.getChildren().add(cell);
-                mathDokuModel.addCell(cell, i, j);
-            }
-
-            listOfVBoxes[i] = vBox;
-        }
-        return listOfVBoxes;
     }
 
     /**
@@ -606,13 +677,15 @@ public class MathDoku extends Application {
             //check cages are valid
             for (Integer[] list : allNumbersList) {
                 //only need to test half?
+                //sort so that the order of cages doesnt matter
+                Arrays.sort(list);
                 for (int i = 0; i < list.length/2; i++) {
                     Integer cell1 = list[i];
                     boolean check = true;
                     for (int j = i+1; j < list.length; j++) {
                         Integer cell2 = list[j];
                         if (cell1 == cell2-1 || cell1 == cell2-tempGridDimensions){
-                        check = false;
+                            check = false;
                         }
                     }
                     if (check){
