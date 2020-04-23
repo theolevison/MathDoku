@@ -24,11 +24,31 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
     private boolean display = false;
     Random rand = new Random();
 
+    /**
+     * Sets the cage's maths target.
+     * 
+     * @param targetNumber Target number.
+     * @param sign Mathmatical operator used to get to the target number.
+     */
     public void setTargetNumber(int targetNumber, String sign) {
         this.targetNumber = targetNumber;
         this.sign = sign;
     }
 
+    /**
+     * Gets the cage's maths target.
+     * 
+     * @return An array of the mathmatical operator used to get to the target number, followed by the target number.
+     */
+    public String[] getTarget(){
+        return new String[]{sign, String.valueOf(targetNumber)};
+    }
+
+    /**
+     * Adds a cell to the cage.
+     * 
+     * @param cell The cell to add.
+     */
     public void addCell(MathDokuCell cell) {
         add(cell);
         cell.setCage(MathDokuCage.this);

@@ -43,11 +43,11 @@ public class MathDoku extends Application {
     private Button redoButton;
     private int gridDimensions;
 
-    private final int MAIN_WINDOW_WIDTH = 650;
-    private final int MAIN_WINDOW_HEIGHT = 500;
+    private final int MINIMUM_MAIN_WINDOW_WIDTH = 925;
+    private final int MINIMUM_MAIN_WINDOW_HEIGHT = 500;
 
-    private final int TITLE_WINDOW_WIDTH = 950;
-    private final int TITLE_WINDOW_HEIGHT = 700;
+    private final int WINDOW_WIDTH = 925;
+    private final int WINDOW_HEIGHT = 700;
 
     /**
      * Allows the user to press the undo button if there are operations in the undo stack.
@@ -101,7 +101,7 @@ public class MathDoku extends Application {
         loadOptionsHBox.setSpacing(10);
 
         loadOptionsHBox.setMaxHeight(100);
-        loadOptionsHBox.setMaxWidth(TITLE_WINDOW_WIDTH);
+        loadOptionsHBox.setMaxWidth(WINDOW_WIDTH);
 
         //loadOptionsHBox.setPrefSize(window_width, window_height);
         //loadOptionsHBox.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
@@ -271,7 +271,7 @@ public class MathDoku extends Application {
         titleRoot.setVgap(10);
         titleRoot.setPadding(new Insets(10, 10, 10, 10));
         
-        titleRoot.setPrefSize(TITLE_WINDOW_WIDTH*0.6, TITLE_WINDOW_HEIGHT*0.6);
+        titleRoot.setPrefSize(WINDOW_WIDTH*0.6, WINDOW_HEIGHT*0.6);
         titleRoot.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
         stage.setMinHeight(300);
@@ -280,7 +280,7 @@ public class MathDoku extends Application {
         titleRoot.add(title, 0, 0, 1, 1);
         titleRoot.add(loadOptionsHBox, 0, 1, 1, 1);
 
-        Scene titleScene = new Scene(titleRoot,TITLE_WINDOW_WIDTH,TITLE_WINDOW_HEIGHT);
+        Scene titleScene = new Scene(titleRoot,WINDOW_WIDTH,WINDOW_HEIGHT);
         
         //stage.minWidthProperty().bind(titleScene.heightProperty().multiply(1.5));
         //stage.minHeightProperty().bind(titleScene.widthProperty().divide(1.5));
@@ -309,18 +309,18 @@ public class MathDoku extends Application {
         root.setAlignment(Pos.CENTER);
         root.setHgap(10);
         root.setVgap(10);
-        root.setPadding(new Insets(40, 40, 40, 40));
+        root.setPadding(new Insets(20, 20, 20, 20));
+
+        //button box
+        VBox buttonVBox = new VBox();
+        buttonVBox.setAlignment(Pos.CENTER);
+        buttonVBox.setSpacing(10);
 
         // undo redo buttons
         HBox undoRedoHBox = new HBox();
         undoButton = new Button("Undo");
         redoButton = new Button("Redo");
-        /*
-        undoButton.setMaxWidth(Double.MAX_VALUE);
-        redoButton.setMaxWidth(Double.MAX_VALUE);
-        undoButton.setMaxHeight(Double.MAX_VALUE);
-        redoButton.setMaxHeight(Double.MAX_VALUE);
-        */
+        
         undoRedoHBox.getChildren().addAll(undoButton, redoButton);
         undoRedoHBox.setAlignment(Pos.CENTER);
         undoRedoHBox.setSpacing(10);
@@ -330,6 +330,19 @@ public class MathDoku extends Application {
 
         undoButton.setDisable(true);
         redoButton.setDisable(true);
+
+        undoButton.setMaxWidth(70);
+        undoButton.setMaxHeight(70);
+        undoButton.prefWidthProperty().bind(undoRedoHBox.widthProperty());
+        undoButton.prefHeightProperty().bind(undoRedoHBox.widthProperty());
+
+        redoButton.setMaxWidth(70);
+        redoButton.setMaxHeight(70);
+        redoButton.prefWidthProperty().bind(undoRedoHBox.widthProperty());
+        redoButton.prefHeightProperty().bind(undoRedoHBox.widthProperty());
+
+        undoRedoHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+        //undoRedoHBox.prefHeightProperty().bind(root.prefHeightProperty());
 
         /*
         undoRedoHBox.heightProperty().addListener((observable, oldValue, newValue) -> {
@@ -350,11 +363,17 @@ public class MathDoku extends Application {
         // clear button
         HBox clearHBox = new HBox();
         Button clearButton = new Button("Clear");
-        clearButton.setMaxWidth(Double.MAX_VALUE);
-        clearButton.setMaxHeight(Double.MAX_VALUE);
         clearHBox.getChildren().addAll(clearButton);
         clearHBox.setAlignment(Pos.CENTER);
         clearHBox.setSpacing(10);
+
+        clearButton.setMaxWidth(70);
+        clearButton.setMaxHeight(70);
+        clearButton.prefWidthProperty().bind(clearHBox.widthProperty());
+        clearButton.prefHeightProperty().bind(clearHBox.widthProperty());
+
+        clearHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+        //clearHBox.prefHeightProperty().bind(root.prefHeightProperty());
 
         //clearHBox.prefWidthProperty().bind(root.widthProperty());
         //clearHBox.prefHeightProperty().bind(root.heightProperty());
@@ -397,20 +416,23 @@ public class MathDoku extends Application {
         //show mistakes button
         HBox showMistakesHBox = new HBox();
         Button showMistakesButton = new Button("Show mistakes");
-        showMistakesButton.setMaxWidth(Double.MAX_VALUE);
-        showMistakesButton.setMaxHeight(Double.MAX_VALUE);
         showMistakesHBox.getChildren().addAll(showMistakesButton);
         showMistakesHBox.setAlignment(Pos.CENTER);
         showMistakesHBox.setSpacing(10);
 
-        //showMistakesHBox.prefWidthProperty().bind(root.widthProperty());
-        //showMistakesHBox.prefHeightProperty().bind(root.heightProperty());
+        showMistakesButton.setMaxWidth(140);
+        showMistakesButton.setMaxHeight(70);
+        showMistakesButton.prefWidthProperty().bind(showMistakesHBox.widthProperty());
+        showMistakesButton.prefHeightProperty().bind(showMistakesHBox.widthProperty());
 
-        //button box
-        VBox buttonVBox = new VBox();
+        showMistakesHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+        //showMistakesHBox.prefHeightProperty().bind(root.prefHeightProperty());
+
+        //add button boxes to other box
         buttonVBox.getChildren().addAll(undoRedoHBox, clearHBox, showMistakesHBox);
-        buttonVBox.setAlignment(Pos.CENTER);
-        buttonVBox.setSpacing(10);
+
+        buttonVBox.prefWidthProperty().bind(root.prefWidthProperty());
+        buttonVBox.prefHeightProperty().bind(root.prefHeightProperty());
 
         //buttonVBox.prefWidthProperty().bind(root.widthProperty());
         //buttonVBox.prefWidth(30);
@@ -450,22 +472,25 @@ public class MathDoku extends Application {
         numberButtonsVBox.setAlignment(Pos.CENTER);
         numberButtonsVBox.setSpacing(10);
 
-        //numberButtonsVBox.prefWidthProperty().bind(root.widthProperty());
-        //numberButtonsVBox.prefWidth(30);
-        //numberButtonsVBox.prefHeightProperty().bind(root.heightProperty());
+        numberButtonsVBox.prefWidthProperty().bind(root.prefWidthProperty());
+        numberButtonsVBox.prefHeightProperty().bind(root.prefHeightProperty());
 
         //ensure that only number buttons appear that are valid for the gridDimensions
         for (int i = 1; i < 10 && i <= gridDimensions; i++) {
             Button button = new Button(Integer.toString(i));
-            button.setMaxWidth(30);
-            button.setMaxHeight(30);
+            button.setMaxWidth(70);
+            button.setMaxHeight(70);
+            button.prefWidthProperty().bind(numberButtonsVBox.widthProperty());
+            button.prefHeightProperty().bind(numberButtonsVBox.widthProperty());
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
         if (gridDimensions > 9){
             Button button = new Button("0");
-            button.setMaxWidth(30);
-            button.setMaxHeight(30);
+            button.setMaxWidth(70);
+            button.setMaxHeight(70);
+            button.prefWidthProperty().bind(numberButtonsVBox.widthProperty());
+            button.prefHeightProperty().bind(numberButtonsVBox.widthProperty());
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
@@ -487,11 +512,11 @@ public class MathDoku extends Application {
 
                 //Bind canvas size to stack pane size.
                 grid.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
-                    cell.setRealWidth((double)newValue/grid.getColumnCount());
+                    cell.setRealWidth((double)newValue/(grid.getColumnCount()+2));
                 });
         
                 grid.prefHeightProperty().addListener((observable, oldValue, newValue) -> {
-                    cell.setRealHeight((double)newValue/grid.getRowCount());
+                    cell.setRealHeight((double)newValue/(grid.getRowCount()+2));
                 });
             }
         }
@@ -557,27 +582,30 @@ public class MathDoku extends Application {
 
         if (list.isEmpty()){
             //generate random
-            //mathDokuModel.generateDefaultGrid();
-            mathDokuModel.generateNewGrid();
+            mathDokuModel.generateDefaultGrid();
+            //mathDokuModel.generateNewGrid();
         } else {
             mathDokuModel.generateFromList(list);
         }
 
-        Scene scene = new Scene(root,MAIN_WINDOW_WIDTH,MAIN_WINDOW_HEIGHT);
+        Scene scene = new Scene(root,WINDOW_WIDTH, WINDOW_HEIGHT);
         
-        stage.setMinHeight(MAIN_WINDOW_HEIGHT);
-        stage.setMinWidth(MAIN_WINDOW_WIDTH);
+        stage.setMinHeight(MINIMUM_MAIN_WINDOW_HEIGHT);
+        stage.setMinWidth(MINIMUM_MAIN_WINDOW_WIDTH);
         
         //Bind main grid to window size.
         root.prefWidthProperty().bind(scene.widthProperty());
         root.prefHeightProperty().bind(scene.heightProperty());
 
-        /*
+        //root.setGridLinesVisible(true);
+        
         root.widthProperty().addListener(e -> {
-            System.out.println("1 " + grid.widthProperty());
-            System.out.println("2 " + root.widthProperty());
+            System.out.println("1 " + buttonVBox.widthProperty());
+            System.out.println("2 " + buttonVBox.prefWidthProperty());
+            System.out.println("3 " + numberButtonsVBox.widthProperty());
+            System.out.println("4 " + numberButtonsVBox.prefWidthProperty());
         });
-        */
+        
 
         scene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
         
@@ -587,7 +615,7 @@ public class MathDoku extends Application {
 
         stage.show();
     }
-
+    
     /**
      * Checks if format of saves are incorrect.
      * <p>
