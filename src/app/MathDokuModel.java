@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Scale;
 
 /**
  * Handles the game rules, generating problems and genrating solutions.
@@ -28,18 +30,20 @@ public class MathDokuModel {
     /**
      * Constructor, reference to mathDoku required for undo/redo.
      * <p>
-     * Breaks the ideal rules of OOP, but it's the easiest way to get the required undo/redo functionality.
+     * Breaks the ideal rules of OOP, but it's the easiest way to get the required
+     * undo/redo functionality.
      * 
      * @param mathDoku The parent class
      */
-    public MathDokuModel(MathDoku mathDoku){
+    public MathDokuModel(MathDoku mathDoku) {
         this.mathDoku = mathDoku;
     }
 
     /**
-     * Disables undo and redo buttons if their respective stacks are empty, otherwise enables them.
+     * Disables undo and redo buttons if their respective stacks are empty,
+     * otherwise enables them.
      */
-    public void toggleUndoRedo(){
+    public void toggleUndoRedo() {
         mathDoku.enableDisableUndo(undoStack.empty());
         mathDoku.enableDisableRedo(redoStack.empty());
     }
@@ -49,7 +53,7 @@ public class MathDokuModel {
      * 
      * @param cell Cell to add to the redo stack.
      */
-    public void pushToRedoStack(MathDokuCell cell){
+    public void pushToRedoStack(MathDokuCell cell) {
         redoStack.push(cell);
         System.out.println("added to redo stack");
     }
@@ -59,7 +63,7 @@ public class MathDokuModel {
      * 
      * @param cell Cell to add to the undo stack.
      */
-    public void pushToUndoStack(MathDokuCell cell){
+    public void pushToUndoStack(MathDokuCell cell) {
         undoStack.push(cell);
         System.out.println("added to undo stack");
     }
@@ -72,7 +76,8 @@ public class MathDokuModel {
     }
 
     /**
-     * Sets up the matrix to store references to all the cells in, sets gridDimensions variable.
+     * Sets up the matrix to store references to all the cells in, sets
+     * gridDimensions variable.
      * 
      * @param gridDimensions The grid dimensions
      */
@@ -84,7 +89,8 @@ public class MathDokuModel {
     /**
      * Returns the currently selected cell.
      * <p>
-     * Adds the cell to the undo stack, as the only time this method is called is when operations are being done on the cell.
+     * Adds the cell to the undo stack, as the only time this method is called is
+     * when operations are being done on the cell.
      * 
      * @return The currently selected cell.
      */
@@ -99,7 +105,7 @@ public class MathDokuModel {
      *
      * @return If the user has selected a cell yet.
      */
-    public boolean hasCurrentCell(){
+    public boolean hasCurrentCell() {
         return currentCell != null;
     }
 
@@ -138,11 +144,12 @@ public class MathDokuModel {
         this.prevCell = prevCell;
     }
 
-    //TODO: generate solution from this so that in the future auto complete works
+    // TODO: generate solution from this so that in the future auto complete works
     /**
      * Creates the grid from an List generated from loading a save.
      * <p>
-     * Takes the save data and generates a grid from it, allows users to play the same game again and share games with others.
+     * Takes the save data and generates a grid from it, allows users to play the
+     * same game again and share games with others.
      * 
      * @param list A list of save data
      */
@@ -153,21 +160,21 @@ public class MathDokuModel {
             String[] numberArray = array1[1].split(",");
 
             String targetNumber = "";
-            for (int i = 0; i < targetArray.length-1; i++) {
+            for (int i = 0; i < targetArray.length - 1; i++) {
                 targetNumber += targetArray[i];
             }
 
-            MathDokuCage cage = new MathDokuCage();
+            MathDokuCage cage = new MathDokuCage(gridDimensions);
 
-            //add cells to cage
+            // add cells to cage
             for (int i = 0; i < numberArray.length; i++) {
                 Integer num = Integer.parseInt(numberArray[i]);
-                Integer thing1 = num%gridDimensions == 0 ? gridDimensions-1 : num%gridDimensions-1;
-                Integer thing2 = (num-1)/gridDimensions;
+                Integer thing1 = num % gridDimensions == 0 ? gridDimensions - 1 : num % gridDimensions - 1;
+                Integer thing2 = (num - 1) / gridDimensions;
                 cage.addCell(grid[thing1][thing2]);
             }
 
-            cage.setTargetNumber(Integer.parseInt(targetNumber),targetArray[targetArray.length-1]);
+            cage.setTargetNumber(Integer.parseInt(targetNumber), targetArray[targetArray.length - 1]);
             cages.add(cage);
         }
 
@@ -177,101 +184,121 @@ public class MathDokuModel {
     /**
      * Generates a default grid if no other options are selected.
      */
-    public void generateDefaultGrid() {
-        MathDokuCage cage1 = new MathDokuCage();
+    public void generateDefault2Grid() {
+        MathDokuCage cage1 = new MathDokuCage(gridDimensions);
         cage1.addCell(grid[0][0]);
         cage1.addCell(grid[0][1]);
-        cage1.setTargetNumber(11,"+");
+        cage1.setTargetNumber(3, "+");
         cages.add(cage1);
 
-        MathDokuCage cage2 = new MathDokuCage();
+        MathDokuCage cage2 = new MathDokuCage(gridDimensions);
         cage2.addCell(grid[1][0]);
-        cage2.addCell(grid[2][0]);
-        cage2.setTargetNumber(2,"÷");
+        cage2.addCell(grid[1][1]);
+        cage2.setTargetNumber(3, "+");
         cages.add(cage2);
 
-        MathDokuCage cage3 = new MathDokuCage();
+        drawCages();
+    }
+
+    // TOOD: replace with loading from list
+    /**
+     * Generates a default grid if no other options are selected.
+     */
+    public void generateDefault6Grid() {
+        MathDokuCage cage1 = new MathDokuCage(gridDimensions);
+        cage1.addCell(grid[0][0]);
+        cage1.addCell(grid[0][1]);
+        cage1.setTargetNumber(11, "+");
+        cages.add(cage1);
+
+        MathDokuCage cage2 = new MathDokuCage(gridDimensions);
+        cage2.addCell(grid[1][0]);
+        cage2.addCell(grid[2][0]);
+        cage2.setTargetNumber(2, "÷");
+        cages.add(cage2);
+
+        MathDokuCage cage3 = new MathDokuCage(gridDimensions);
         cage3.addCell(grid[1][1]);
         cage3.addCell(grid[2][1]);
-        cage3.setTargetNumber(3,"-");
+        cage3.setTargetNumber(3, "-");
         cages.add(cage3);
 
-        MathDokuCage cage4 = new MathDokuCage();
+        MathDokuCage cage4 = new MathDokuCage(gridDimensions);
         cage4.addCell(grid[3][0]);
         cage4.addCell(grid[3][1]);
-        cage4.setTargetNumber(20,"x");
+        cage4.setTargetNumber(20, "x");
         cages.add(cage4);
 
-        MathDokuCage cage5 = new MathDokuCage();
+        MathDokuCage cage5 = new MathDokuCage(gridDimensions);
         cage5.addCell(grid[4][0]);
         cage5.addCell(grid[5][0]);
         cage5.addCell(grid[5][1]);
         cage5.addCell(grid[5][2]);
-        cage5.setTargetNumber(6,"x");
+        cage5.setTargetNumber(6, "x");
         cages.add(cage5);
 
-        MathDokuCage cage6 = new MathDokuCage();
+        MathDokuCage cage6 = new MathDokuCage(gridDimensions);
         cage6.addCell(grid[4][1]);
         cage6.addCell(grid[4][2]);
-        cage6.setTargetNumber(3,"÷");
+        cage6.setTargetNumber(3, "÷");
         cages.add(cage6);
 
-        MathDokuCage cage7 = new MathDokuCage();
+        MathDokuCage cage7 = new MathDokuCage(gridDimensions);
         cage7.addCell(grid[0][2]);
         cage7.addCell(grid[1][2]);
         cage7.addCell(grid[0][3]);
         cage7.addCell(grid[1][3]);
-        cage7.setTargetNumber(240,"x");
+        cage7.setTargetNumber(240, "x");
         cages.add(cage7);
 
-        MathDokuCage cage8 = new MathDokuCage();
+        MathDokuCage cage8 = new MathDokuCage(gridDimensions);
         cage8.addCell(grid[2][2]);
         cage8.addCell(grid[3][2]);
-        cage8.setTargetNumber(6,"x");
+        cage8.setTargetNumber(6, "x");
         cages.add(cage8);
 
-        MathDokuCage cage9 = new MathDokuCage();
+        MathDokuCage cage9 = new MathDokuCage(gridDimensions);
         cage9.addCell(grid[0][4]);
         cage9.addCell(grid[1][4]);
-        cage9.setTargetNumber(6,"x");
+        cage9.setTargetNumber(6, "x");
         cages.add(cage9);
 
-        MathDokuCage cage10 = new MathDokuCage();
+        MathDokuCage cage10 = new MathDokuCage(gridDimensions);
         cage10.addCell(grid[2][3]);
         cage10.addCell(grid[2][4]);
-        cage10.setTargetNumber(6,"x");
+        cage10.setTargetNumber(6, "x");
         cages.add(cage10);
 
-        MathDokuCage cage11 = new MathDokuCage();
+        MathDokuCage cage11 = new MathDokuCage(gridDimensions);
         cage11.addCell(grid[3][3]);
         cage11.addCell(grid[3][4]);
         cage11.addCell(grid[4][4]);
-        cage11.setTargetNumber(7,"+");
+        cage11.setTargetNumber(7, "+");
         cages.add(cage11);
 
-        MathDokuCage cage12 = new MathDokuCage();
+        MathDokuCage cage12 = new MathDokuCage(gridDimensions);
         cage12.addCell(grid[4][3]);
         cage12.addCell(grid[5][3]);
-        cage12.setTargetNumber(30,"x");
+        cage12.setTargetNumber(30, "x");
         cages.add(cage12);
 
-        MathDokuCage cage13 = new MathDokuCage();
+        MathDokuCage cage13 = new MathDokuCage(gridDimensions);
         cage13.addCell(grid[0][5]);
         cage13.addCell(grid[1][5]);
         cage13.addCell(grid[2][5]);
-        cage13.setTargetNumber(8,"+");
+        cage13.setTargetNumber(8, "+");
         cages.add(cage13);
 
-        MathDokuCage cage14 = new MathDokuCage();
+        MathDokuCage cage14 = new MathDokuCage(gridDimensions);
         cage14.addCell(grid[3][5]);
         cage14.addCell(grid[4][5]);
-        cage14.setTargetNumber(2,"÷");
+        cage14.setTargetNumber(2, "÷");
         cages.add(cage14);
 
-        MathDokuCage cage15 = new MathDokuCage();
+        MathDokuCage cage15 = new MathDokuCage(gridDimensions);
         cage15.addCell(grid[5][5]);
         cage15.addCell(grid[5][4]);
-        cage15.setTargetNumber(9,"+");
+        cage15.setTargetNumber(9, "+");
         cages.add(cage15);
 
         drawCages();
@@ -280,21 +307,21 @@ public class MathDokuModel {
     /**
      * Undoes the last operation.
      */
-    public void undo(){
+    public void undo() {
         undoStack.pop().undo();
     }
 
     /**
      * Redoes the last undone operation.
      */
-    public void redo(){
+    public void redo() {
         redoStack.pop().redo();
     }
 
     /**
      * Resets the grid and game back to when the grid was loaded.
      */
-    public void clearAllCells(){
+    public void clearAllCells() {
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
                 grid[i][j].clearCell();
@@ -306,26 +333,25 @@ public class MathDokuModel {
     }
 
     /**
-     * Pseudorandomly creates cages, then generates a sodoku solution, then generates target numbers in the cages, turning it into mathdoku.
+     * Pseudorandomly creates cages, then generates a sodoku solution, then
+     * generates target numbers in the cages, turning it into mathdoku.
      */
     public void generateNewGrid() {
-        
+
         generateCages();
-        //decide solution first before drawing and setting target numbers
-        //fill single cages to make layout more random and not symmetrical
+        // decide solution first before drawing and setting target numbers
+        // fill single cages to make layout more random and not symmetrical
 
         for (MathDokuCage mathDokuCage : cages) {
             mathDokuCage.fillSingleCages(gridDimensions);
         }
 
-        generateGeneralSolution();
+        generateGeneralSodoku();
 
         /*
-        //now calculate maths targets
-        for (MathDokuCage mathDokuCage : cages) {
-            mathDokuCage.fillBigCages(gridDimensions);
-        }
-        */
+         * //now calculate maths targets for (MathDokuCage mathDokuCage : cages) {
+         * mathDokuCage.fillBigCages(gridDimensions); }
+         */
 
         drawCages();
     }
@@ -333,60 +359,61 @@ public class MathDokuModel {
     /**
      * Generate a sodoku solution.
      */
-    private void generateGeneralSolution(){
-        //generate solution numbers based on normal sudoku rules, taking into account the single cell targets
-        //so that check works with solution numbers, we have to setNumber() instead of setSolutionNumber()
-        //remember to switch at the end before the grid is rendered
-        //never mind I see no easy way to do that without loads of faff and weird coupling
-        //just basically copy the code again :(
+    private void generateGeneralSodoku() {
+        // generate solution numbers based on normal sudoku rules, taking into account
+        // the single cell targets
+        // so that check works with solution numbers, we have to setNumber() instead of
+        // setSolutionNumber()
+        // remember to switch at the end before the grid is rendered
+        // never mind I see no easy way to do that without loads of faff and weird
+        // coupling
+        // just basically copy the code again :(
 
-        //In the unlikely event that there are two single cells with the same number, start the grid generation process over again
-        
+        // In the unlikely event that there are two single cells with the same number,
+        // start the grid generation process over again
 
-        if (checkSolutions()){
+        if (checkSolutions()) {
             generateNewGrid();
             return;
         }
-        
 
-        //DO NOT CHANGE SINGLE CAGES!!!
+        // DO NOT CHANGE SINGLE CAGES!!!
         Set<MathDokuCell> singleCells = new HashSet<MathDokuCell>();
         for (MathDokuCage mathDokuCage : cages) {
-                if (cages.size() == 1){
-                    singleCells.addAll(mathDokuCage);
-                }
+            if (cages.size() == 1) {
+                singleCells.addAll(mathDokuCage);
+            }
         }
 
-        
-        //TODO: decide if the outer do-while is necessary
-        //TODO: I think this could be improved with sets for rows and columns, then you wouldnt have to try out values that have already been entered
+        // TODO: decide if the outer do-while is necessary
+        // TODO: I think this could be improved with sets for rows and columns, then you
+        // wouldnt have to try out values that have already been entered
         do {
             System.out.println("hiii");
-            //try out solutions until no errors are found
+            // try out solutions until no errors are found
             for (int i = 0; i < gridDimensions; i++) {
                 for (int j = 0; j < gridDimensions; j++) {
                     MathDokuCell cell = grid[i][j];
 
-                    //DO NOT CHANGE SINGLE CAGES!!!
-                    if (!singleCells.contains(cell)){
+                    // DO NOT CHANGE SINGLE CAGES!!!
+                    if (!singleCells.contains(cell)) {
                         for (int k = 1; k <= gridDimensions; k++) {
-                            //try out a number
-                            cell.setSolutionNumber(k);
-                            //then check it hasnt broken any rules
-                            if (checkSolutions()){
+                            // try out a number
+                            cell.setFinalSolutionNumber(k);
+                            // then check it hasnt broken any rules
+                            if (checkSolutions()) {
                                 System.out.println(k);
-                                //System.out.println(count);
+                                // System.out.println(count);
                                 break;
                             }
                         }
                     }
                 }
             }
-            //TODO: get rid of this or make it !checkSolutions()
+            // TODO: get rid of this or make it !checkSolutions()
         } while (checkSolutions());
-        
 
-        //have to do this to reset after using checkSolutions()
+        // have to do this to reset after using checkSolutions()
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
                 MathDokuCell cell = grid[i][j];
@@ -395,7 +422,6 @@ public class MathDokuModel {
             }
         }
         check(true);
-        
 
     }
 
@@ -405,52 +431,55 @@ public class MathDokuModel {
     private void generateCages() {
         Set<MathDokuCell> usedCellsSet = new HashSet<MathDokuCell>();
 
-        while (usedCellsSet.size() < gridDimensions*gridDimensions) {
-            //generate new cage from next available cell that isnt already in a cage.
+        while (usedCellsSet.size() < gridDimensions * gridDimensions) {
+            // generate new cage from next available cell that isnt already in a cage.
             MathDokuCage cage = createCage(usedCellsSet);
             cages.add(cage);
         }
     }
 
     /**
-     * Generate a single cage from unused cells, restricting it's minimum and maximum size.
+     * Generate a single cage from unused cells, restricting it's minimum and
+     * maximum size.
      * 
      * @param usedCellSet The set of cells that have already been used.
      * @return A MathDokuCage with cells in a valid configuration.
      */
     private MathDokuCage createCage(Set<MathDokuCell> usedCellsSet) {
-        
+
         Random rand = new Random();
-        int maximumCells = gridDimensions*gridDimensions;
+        int maximumCells = gridDimensions * gridDimensions;
         int numberToAdd;
 
         do {
-            //restrict maximum size of cage to 6 and prevent it being 0.
+            // restrict maximum size of cage to 6 and prevent it being 0.
             numberToAdd = rand.nextInt(6);
-            //regenerate to reduce the probability of single cages to 1/36, in reality it's higher.
-            if (numberToAdd == 1){
+            // regenerate to reduce the probability of single cages to 1/36, in reality it's
+            // higher.
+            if (numberToAdd == 1) {
                 numberToAdd = rand.nextInt(6);
             }
         } while (numberToAdd == 0);
 
-        //if there are only a few cells left, use those.
-        if ((usedCellsSet.size() + numberToAdd) > maximumCells){
+        // if there are only a few cells left, use those.
+        if ((usedCellsSet.size() + numberToAdd) > maximumCells) {
             numberToAdd = maximumCells - usedCellsSet.size();
         }
 
-        //System.out.println("\nnumber to add: " + numberToAdd);
+        // System.out.println("\nnumber to add: " + numberToAdd);
 
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
-                
-                //if the cell is not in a cage, begin a cage from this cell.
-                if (!usedCellsSet.contains(grid[i][j])){
 
-                    Set<MathDokuCell> cellsToAddToCage = generateCageSet(numberToAdd, usedCellsSet, new HashSet<MathDokuCell>(), i, j);
+                // if the cell is not in a cage, begin a cage from this cell.
+                if (!usedCellsSet.contains(grid[i][j])) {
+
+                    Set<MathDokuCell> cellsToAddToCage = generateCageSet(numberToAdd, usedCellsSet,
+                            new HashSet<MathDokuCell>(), i, j);
                     System.out.println(cellsToAddToCage.size());
 
-                    //once the set has been generated, create a cage with the cells in the set.
-                    MathDokuCage cage = new MathDokuCage();
+                    // once the set has been generated, create a cage with the cells in the set.
+                    MathDokuCage cage = new MathDokuCage(gridDimensions);
                     for (MathDokuCell mathDokuCell : cellsToAddToCage) {
                         cage.addCell(mathDokuCell);
                     }
@@ -459,23 +488,27 @@ public class MathDokuModel {
             }
         }
 
-        return new MathDokuCage();
+        // should never be reached
+        return new MathDokuCage(gridDimensions);
     }
 
     /**
      * Recursively generates a set of adjacent cells without an existing cage.
      * <p>
-     * The first cell is always unused, so that is successfully added to the cage, guaranteeing at least one cell in the cage.
-     * There is a 60% chance to branch in each direction to create a random pattern of cells.
+     * The first cell is always unused, so that is successfully added to the cage,
+     * guaranteeing at least one cell in the cage. There is a 60% chance to branch
+     * in each direction to create a random pattern of cells.
      * 
-     * @param numberToAdd The amount of cells that this cage should contain.
-     * @param usedCellsSet The set of cells that have already been used.
-     * @param cellsToAddToCage The set of cells that will eventually become the cage.
-     * @param i The x coordinate that is used to find a new cell.
-     * @param j The y coordinate that is used to find a new cell.
+     * @param numberToAdd      The amount of cells that this cage should contain.
+     * @param usedCellsSet     The set of cells that have already been used.
+     * @param cellsToAddToCage The set of cells that will eventually become the
+     *                         cage.
+     * @param i                The x coordinate that is used to find a new cell.
+     * @param j                The y coordinate that is used to find a new cell.
      * @return A set of cells in the cage.
      */
-    private Set<MathDokuCell> generateCageSet(Integer numberToAdd, Set<MathDokuCell> usedCellsSet, Set<MathDokuCell> cellsToAddToCage, int i, int j){
+    private Set<MathDokuCell> generateCageSet(Integer numberToAdd, Set<MathDokuCell> usedCellsSet,
+            Set<MathDokuCell> cellsToAddToCage, int i, int j) {
 
         Random rand = new Random();
         MathDokuCell cell;
@@ -483,40 +516,42 @@ public class MathDokuModel {
         try {
             cell = grid[i][j];
         } catch (IndexOutOfBoundsException e) {
-            //can't add to cage because the grid border has been hit, to stop this happening forever, take 1 from numberToAdd.
+            // can't add to cage because the grid border has been hit, to stop this
+            // happening forever, take 1 from numberToAdd.
             numberToAdd--;
             return cellsToAddToCage;
         }
 
-        if (numberToAdd <= cellsToAddToCage.size() || usedCellsSet.contains(cell)){
+        if (numberToAdd <= cellsToAddToCage.size() || usedCellsSet.contains(cell)) {
             return cellsToAddToCage;
         } else {
-            //add this cell to the cage.
+            // add this cell to the cage.
             usedCellsSet.add(cell);
             cellsToAddToCage.add(cell);
 
-            //find neighbours, call addToCage on those.
-            //to create cages with interesting shapes, give a 60% chance to progress in each direction.
+            // find neighbours, call addToCage on those.
+            // to create cages with interesting shapes, give a 60% chance to progress in
+            // each direction.
 
-            if (rand.nextInt(10) < 6){
-                //try above
-                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i, j-1));
+            if (rand.nextInt(10) < 6) {
+                // try above
+                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i, j - 1));
             }
 
-            if (rand.nextInt(10) < 6){
-                //try below
-                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i, j+1));
+            if (rand.nextInt(10) < 6) {
+                // try below
+                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i, j + 1));
             }
 
-            if (rand.nextInt(10) < 6){
-                //try left
-                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i-1, j));
+            if (rand.nextInt(10) < 6) {
+                // try left
+                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i - 1, j));
             }
 
-            if (rand.nextInt(10) < 6){
-                //try right
-                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i+1, j));
-            }   
+            if (rand.nextInt(10) < 6) {
+                // try right
+                cellsToAddToCage.addAll(generateCageSet(numberToAdd, usedCellsSet, cellsToAddToCage, i + 1, j));
+            }
         }
         return cellsToAddToCage;
     }
@@ -529,44 +564,44 @@ public class MathDokuModel {
             for (int j = 0; j < gridDimensions; j++) {
                 MathDokuCell cell = grid[i][j];
                 cell.setTargetNumber(cell.getCage().display());
-                
+
                 try {
-                    if (cell.getCage().equals(grid[i][j+1].getCage())){
-                        //do nothing because the cage has a cell below
+                    if (cell.getCage().equals(grid[i][j + 1].getCage())) {
+                        // do nothing because the cage has a cell below
                     } else {
                         cell.setCageWall(0, true);
                     }
-                } catch (ArrayIndexOutOfBoundsException e){
+                } catch (ArrayIndexOutOfBoundsException e) {
                     cell.setCageWall(0, true);
                 }
 
                 try {
-                    if (cell.getCage().equals(grid[i-1][j].getCage())){
-                        //do nothing because the cage has a cell left
+                    if (cell.getCage().equals(grid[i - 1][j].getCage())) {
+                        // do nothing because the cage has a cell left
                     } else {
                         cell.setCageWall(1, true);
                     }
-                } catch (ArrayIndexOutOfBoundsException e){
+                } catch (ArrayIndexOutOfBoundsException e) {
                     cell.setCageWall(1, true);
                 }
 
                 try {
-                    if (cell.getCage().equals(grid[i][j-1].getCage())){
-                        //do nothing because the cage has a cell top
+                    if (cell.getCage().equals(grid[i][j - 1].getCage())) {
+                        // do nothing because the cage has a cell top
                     } else {
                         cell.setCageWall(2, true);
                     }
-                } catch (ArrayIndexOutOfBoundsException e){
+                } catch (ArrayIndexOutOfBoundsException e) {
                     grid[i][j].setCageWall(2, true);
                 }
 
                 try {
-                    if (cell.getCage().equals(grid[i+1][j].getCage())){
-                        //do nothing because the cage has a cell right
+                    if (cell.getCage().equals(grid[i + 1][j].getCage())) {
+                        // do nothing because the cage has a cell right
                     } else {
                         cell.setCageWall(3, true);
                     }
-                } catch (ArrayIndexOutOfBoundsException e){
+                } catch (ArrayIndexOutOfBoundsException e) {
                     cell.setCageWall(3, true);
                 }
             }
@@ -577,8 +612,8 @@ public class MathDokuModel {
      * Add cell to matrix.
      * 
      * @param cell Cell to add.
-     * @param x X index.
-     * @param y Y index.
+     * @param x    X index.
+     * @param y    Y index.
      */
     public void addCell(MathDokuCell cell, int x, int y) {
         grid[x][y] = cell;
@@ -590,11 +625,11 @@ public class MathDokuModel {
      * @param highlight Whether or not to highlight the cells.
      * @return If the maths is correct.
      */
-    public boolean checkMaths(boolean highlight){
+    public boolean checkMaths(boolean highlight) {
         boolean check = true;
 
         for (MathDokuCage mathDokuCage : cages) {
-            if (!mathDokuCage.checkMaths(highlight)){
+            if (!mathDokuCage.checkMaths(highlight)) {
                 check = false;
             }
         }
@@ -608,7 +643,7 @@ public class MathDokuModel {
     public boolean checkAllCellsFilled() {
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
-                if (grid[i][j].getNumber() == ""){
+                if (grid[i][j].getNumber() == "") {
                     return false;
                 }
             }
@@ -616,15 +651,19 @@ public class MathDokuModel {
         return true;
     }
 
-    //TODO: see if this can be made more elegant/efficient/use of the same code in both parts/do all highlighting at the end? (idk if that would actually improve performance or make it worse)
+    // TODO: see if this can be made more elegant/efficient/use of the same code in
+    // both parts/do all highlighting at the end? (idk if that would actually
+    // improve performance or make it worse)
     /**
-     * Checks the user's answers for row and column conflicts according to sudoku rules.
+     * Checks the user's answers for row and column conflicts according to sudoku
+     * rules.
      * 
-     * @param highlight Whether or not to highlight the cells according to the user's decision.
+     * @param highlight Whether or not to highlight the cells according to the
+     *                  user's decision.
      * @return True if there are no conflicts.
      */
-    public boolean check(boolean highlight){
-        //have to initalise these to make the compiler stop complaining
+    public boolean check(boolean highlight) {
+        // have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
 
@@ -634,70 +673,74 @@ public class MathDokuModel {
             noColumnConflict = true;
             noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
-                
-                //attempt to add number to columnSet, if there is a conflict then highlight the column
+
+                // attempt to add number to columnSet, if there is a conflict then highlight the
+                // column
                 try {
-                    if (!columnSet.add(Integer.parseInt(grid[i][j].getNumber()))){
+                    if (!columnSet.add(Integer.parseInt(grid[i][j].getNumber()))) {
                         for (int k = 0; k < gridDimensions; k++) {
-                            if (highlight){
+                            if (highlight) {
                                 grid[i][k].highlight(Color.RED);
                             }
                             grid[i][k].setColumnConflict(true);
                             noColumnConflict = false;
-                            
+
                         }
-                        //only need to find the first conflict to highlight it, so move to the next column
-                        //break;
-                    } else if (noColumnConflict){
-                        //if everything is correct unhighlight
+                        // only need to find the first conflict to highlight it, so move to the next
+                        // column
+                        // break;
+                    } else if (noColumnConflict) {
+                        // if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(false);
-                            if (!grid[i][k].hasConflict()){
+                            if (!grid[i][k].hasConflict()) {
                                 grid[i][k].highlight(Color.GREY);
                             }
                         }
                     }
                 } catch (NumberFormatException e) {
-                    //Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught
                 }
 
-                //attempt to add number to rowSet, if there is a conflict then highlight the row
+                // attempt to add number to rowSet, if there is a conflict then highlight the
+                // row
                 try {
-                    if (!rowSet.add(Integer.parseInt(grid[j][i].getNumber()))){
+                    if (!rowSet.add(Integer.parseInt(grid[j][i].getNumber()))) {
                         for (int k = 0; k < gridDimensions; k++) {
-                            if (highlight){
+                            if (highlight) {
                                 grid[k][i].highlight(Color.RED);
                             }
                             grid[k][i].setRowConflict(true);
                             noRowConflict = false;
                         }
-                        //only need to find the first conflict to highlight it, so move to the next row
-                        //break;
-                    } else if (noRowConflict){
-                        //if everything is correct unhighlight
+                        // only need to find the first conflict to highlight it, so move to the next row
+                        // break;
+                    } else if (noRowConflict) {
+                        // if everything is correct unhighlight
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(false);
-                            if (!grid[k][i].hasConflict()){
+                            if (!grid[k][i].hasConflict()) {
                                 grid[k][i].highlight(Color.GREY);
                             }
                         }
-                    }  
+                    }
                 } catch (NumberFormatException e) {
-                    //Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught
                 }
             }
         }
         return noColumnConflict && noRowConflict;
     }
 
-    //TODO: idk try to merge with above, not likely to happen tbh
+    // TODO: idk try to merge with above, not likely to happen tbh
     /**
-     * Checks the solution numbers for row and column conflicts according to sudoku rules, does not highlight.
+     * Checks the solution numbers for row and column conflicts according to sudoku
+     * rules, does not highlight.
      * 
      * @return True there are no conflicts.
      */
-    public boolean checkSolutions(){
-        //have to initalise these to make the compiler stop complaining
+    public boolean checkSolutions() {
+        // have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
 
@@ -707,43 +750,43 @@ public class MathDokuModel {
             noColumnConflict = true;
             noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
-                
-                //attempt to add number to columnSet, check if there is a conflict
+
+                // attempt to add number to columnSet, check if there is a conflict
                 try {
-                    if (!columnSet.add(grid[i][j].getSolutionNumber())){
+                    if (!columnSet.add(grid[i][j].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(true);
                             noColumnConflict = false;
                         }
-                        //only need to find the first conflict, so move to the next column
-                        //break;
-                    } else if (noColumnConflict){
-                        //everything is correct
+                        // only need to find the first conflict, so move to the next column
+                        // break;
+                    } else if (noColumnConflict) {
+                        // everything is correct
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(false);
                         }
                     }
                 } catch (NumberFormatException e) {
-                    //Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught
                 }
 
-                //attempt to add number to rowSet, check if there is a conflict
+                // attempt to add number to rowSet, check if there is a conflict
                 try {
-                    if (!rowSet.add(grid[j][i].getSolutionNumber())){
+                    if (!rowSet.add(grid[j][i].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(true);
                             noRowConflict = false;
                         }
-                        //only need to find the first conflict, so move to the next row
-                        //break;
-                    } else if (noRowConflict){
-                        //everything is correct
+                        // only need to find the first conflict, so move to the next row
+                        // break;
+                    } else if (noRowConflict) {
+                        // everything is correct
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(false);
                         }
-                    }  
+                    }
                 } catch (NumberFormatException e) {
-                    //Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught
                 }
             }
         }
@@ -751,27 +794,115 @@ public class MathDokuModel {
         return noColumnConflict && noRowConflict;
     }
 
+    public void solve() {
 
-    private void solve() {
-        
-    }
-
-    private String[][] findPossibleCellSolutions() {
-        String[][] posSolutionsGrid = new String[gridDimensions][gridDimensions];
-
+        // check for single cells.
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
-                
-                MathDokuCell cell = grid[i][j];
-                String sign = cell.getCage().getTarget()[0];
-                String targetNumber = cell.getCage().getTarget()[1];
+                if (grid[i][j].getFinalSolutionNumber() != 0) {
+                    // eliminate that number from other cell's possibility sets in the same
+                    // row/column.
+                    for (int k = 0; k < gridDimensions; k++) {
+                        if (k != i && k != j){
+                            System.out.println("found a single");
+                            // column.
+                            List<Integer> list = grid[i][k].getPossibleSolutionList();
+                            list.remove((Integer) grid[i][j].getFinalSolutionNumber());
+                            //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
+                            grid[i][k].setAbsoluteSolutionList(new ArrayList<Integer>(list));
 
-                
-                
+                            // row.
+                            list = grid[k][j].getPossibleSolutionList();
+                            list.remove((Integer) grid[i][j].getFinalSolutionNumber());
+                            //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
+                            grid[k][j].setAbsoluteSolutionList(new ArrayList<Integer>(list));
+                        }
+                    }
+                }
             }
         }
-        
-        return posSolutionsGrid;
+
+        // now start recursively finding a solution.
+        // start in top left.
+        if (solveRecursively(0, 0)) {
+            // solution has been found
+
+            for (int i = 0; i < gridDimensions; i++) {
+                for (int j = 0; j < gridDimensions; j++) {
+                    MathDokuCell cell = grid[i][j];
+                    // TODO: decide if I should bother updating this
+                    // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
+                    cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
+                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                }
+            }
+            System.out.println("Puzzle has been solved");
+        }
     }
 
+    private boolean solveRecursively(int i, int j) {
+        MathDokuCell cell = grid[i][j];
+
+        // if solution is known, use that.
+        if (cell.getFinalSolutionNumber() != 0) {
+            cell.setPossibleSolutionNumber(cell.getFinalSolutionNumber());
+        } else {
+            // try the first option from the set.
+            // set should never be empty at this point fingers crossed.
+
+            if (cell.getPossibleSolutionList().isEmpty()) {
+                // options exhausted here so the error is higher up, so reset possible solution list to known values.
+
+                //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
+                cell.setPossibleSolutionList(new ArrayList<Integer>(cell.getAbsoluteSolutionList()));
+                System.out.println("Failed: list exhausted go up 1");
+                return false;
+            }
+
+            cell.setPossibleSolutionNumber(cell.getPossibleSolutionList().get(0));
+        }
+        //cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
+
+
+        //eliminate that number from other cell's possibility sets in the same row/column.
+        for (int k = 0; k < gridDimensions; k++) {
+            if (k != i && k != j){
+                //column.
+                grid[i][k].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber());
+
+                //row.
+                grid[k][j].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber());
+            }
+        }
+
+        boolean success = false;
+        if (i < gridDimensions - 1){
+            success = solveRecursively(i+1, j);
+        } else if (j < gridDimensions - 1){
+            success = solveRecursively(0, j+1);
+        } else {
+            //i = 5 and j =5
+            success = checkSolutions();
+            System.out.println(success);
+        }
+
+        if (!success && !cell.getPossibleSolutionList().isEmpty()){
+            //error but more options available so remove this attempt and try those.
+            cell.getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber());
+
+            return solveRecursively(i, j);
+
+        } else if (!success && cell.getPossibleSolutionList().isEmpty()) {
+            //options exhausted here so the error is higher up, so reset possible solution list to known values.
+
+            //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
+            cell.setPossibleSolutionList(new ArrayList<Integer>(cell.getAbsoluteSolutionList()));
+            System.out.println("Failed: list exhausted go up 2");
+            return false;
+        }
+
+        //this branch was successful, but the overall attempt may not be, so go up.
+        System.out.println("Branch success: go up");
+        return true;
+    }
 }

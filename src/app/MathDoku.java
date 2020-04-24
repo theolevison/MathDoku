@@ -425,6 +425,8 @@ public class MathDoku extends Application {
         showMistakesButton.prefWidthProperty().bind(showMistakesHBox.widthProperty());
         showMistakesButton.prefHeightProperty().bind(showMistakesHBox.widthProperty());
 
+        showMistakesButton.setOnAction(e -> mathDokuModel.solve());
+
         showMistakesHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
         //showMistakesHBox.prefHeightProperty().bind(root.prefHeightProperty());
 
@@ -433,6 +435,7 @@ public class MathDoku extends Application {
 
         buttonVBox.prefWidthProperty().bind(root.prefWidthProperty());
         buttonVBox.prefHeightProperty().bind(root.prefHeightProperty());
+
 
         //buttonVBox.prefWidthProperty().bind(root.widthProperty());
         //buttonVBox.prefWidth(30);
@@ -582,7 +585,8 @@ public class MathDoku extends Application {
 
         if (list.isEmpty()){
             //generate random
-            mathDokuModel.generateDefaultGrid();
+            //mathDokuModel.generateDefault2Grid();
+            mathDokuModel.generateDefault6Grid();
             //mathDokuModel.generateNewGrid();
         } else {
             mathDokuModel.generateFromList(list);

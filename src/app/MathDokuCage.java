@@ -1,8 +1,11 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javafx.scene.paint.Color;
 
@@ -22,7 +25,12 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
     private int targetNumber;
     private String sign;
     private boolean display = false;
-    Random rand = new Random();
+    private Random rand = new Random();
+    private int gridDimensions;
+
+    public MathDokuCage(int gridDimensions){
+        this.gridDimensions = gridDimensions;
+    }
 
     /**
      * Sets the cage's maths target.
@@ -49,7 +57,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
      * 
      * @param cell The cell to add.
      */
-    public void addCell(MathDokuCell cell) {
+    public void addCell(MathDokuCell cell){
         add(cell);
         cell.setCage(MathDokuCage.this);
     }
@@ -65,14 +73,14 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             float sum;
             if (sign.equals("+")){
                 sum = 0;
-                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                for (MathDokuCell mathDokuCell : this){
                     sum += Integer.parseInt(mathDokuCell.getNumber());
                 }
             } else if (sign.equals("-")){
                 sum = 0;
                 ArrayList<Integer> list = new ArrayList<Integer>();
                 //sort low to high first (for this can be any order). Does prevent negative targets
-                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                for (MathDokuCell mathDokuCell : this){
                     list.add(Integer.parseInt(mathDokuCell.getNumber()));
                 }
                 list.sort(null); //low to high
@@ -82,14 +90,14 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 }
             } else if (sign.equals("x")){
                 sum = 1;
-                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                for (MathDokuCell mathDokuCell : this){
                     sum = sum * Integer.parseInt(mathDokuCell.getNumber());
                 }
             } else {
                 sum = 1;
                 List<Integer> list = new ArrayList<Integer>();
                 //sort low to high first
-                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                for (MathDokuCell mathDokuCell : this){
                     list.add(Integer.parseInt(mathDokuCell.getNumber()));
                 }
                 list.sort(null); //must be low to high otherwise it doesnt work
@@ -105,7 +113,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 return true;
             } else if (highlight){
                 //highlight cells
-                for (MathDokuCell mathDokuCell : MathDokuCage.this){
+                for (MathDokuCell mathDokuCell : this){
                     mathDokuCell.highlight(Color.ORANGE);
                 }
                 return false;
@@ -130,7 +138,8 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             int num;
             do {
                 num = rand.nextInt(gridDimensions);
-                get(0).setSolutionNumber(num);
+                get(0).setFinalSolutionNumber(num);
+                get(0).setPossibleSolutionList(new ArrayList<Integer>(Arrays.asList(num)));
                 targetNumber = num;
             } while (num == 0);
         }
@@ -154,8 +163,8 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             //check if the numbers can divide each other without leaving remainders
             for (int i = 0; i < size(); i++) {
                 for (int j = 0; j < size(); j++) {
-                    int x = get(i).getSolutionNumber();
-                    int y = get(j).getSolutionNumber();
+                    int x = get(i).getFinalSolutionNumber();
+                    int y = get(j).getFinalSolutionNumber();
                     //check if the remainder is zero and that the number is not the same
                     //TODO: check all division combinations
                     if ((x%y)%divisionQuotient == 0 && x/y != 1){
@@ -182,7 +191,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 if (signNum == 0){
                     int sum = 0;
                     for (MathDokuCell mathDokuCell : MathDokuCage.this) {
-                        sum += mathDokuCell.getSolutionNumber();
+                        sum += mathDokuCell.getFinalSolutionNumber();
                     }
                     targetNumber = sum;
                     sign = "+";
@@ -198,7 +207,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 } else if (signNum == 2){
                     int sum = 1;
                     for (MathDokuCell mathDokuCell : MathDokuCage.this) {
-                        sum = sum * mathDokuCell.getSolutionNumber();
+                        sum = sum * mathDokuCell.getFinalSolutionNumber();
                     }
                     targetNumber = sum;
                     sign = "x";

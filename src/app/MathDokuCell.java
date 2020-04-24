@@ -1,5 +1,9 @@
 package app;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import javafx.beans.property.DoubleProperty;
@@ -34,40 +38,81 @@ public class MathDokuCell extends StackPane{
     private MathDokuCanvas mathDokuCanvas;
     private MathDokuCage cage;
     private Label targetNumber;
-    private int solutionNumber;
     private Stack<String> undoStack = new Stack<String>();
     private Stack<String> redoStack = new Stack<String>();
-    private DoubleProperty realWidth = new SimpleDoubleProperty(30);
+    private int finalSolutionNumber;
+    private int possibleSolutionNumber;
+    private List<Integer> possibleSolutionList = new ArrayList<Integer>();
+    private List<Integer> absoluteSolutionList = new ArrayList<Integer>();
  
     // To get around stack pane not resizing use a property I can bind to and then bind off of
     // Define all that is needed for that
+    private DoubleProperty realWidth = new SimpleDoubleProperty(30);
     public final double getRealWidth(){return realWidth.get();}
- 
     public final void setRealWidth(double value){realWidth.set(value);}
- 
     public DoubleProperty realWidthProperty() {return realWidth;}
 
     // Do the same for height
     private DoubleProperty realHeight = new SimpleDoubleProperty();
-  
     public final double getRealHeight(){return realHeight.get();}
- 
     public final void setRealHeight(double value){realHeight.set(value);}
- 
     public DoubleProperty realHeightProperty() {return realHeight;}
 
     /**
-     * @param solutionNumber A number that is part of a solution to the math doku.
+     * @param possibleSolutionSet A list that contains possible solution numbers for the math doku.
      */
-    public void setSolutionNumber(int solutionNumber) {
-        this.solutionNumber = solutionNumber;
+    public void setPossibleSolutionList(List<Integer> possibleSolutionList) {
+        this.possibleSolutionList = possibleSolutionList;
     }
 
     /**
-     * @return A number that is part of a solution to the math doku.
+     * @return A list that contains possible solution numbers for the math doku.
      */
-    public int getSolutionNumber() {
-        return solutionNumber;
+    public List<Integer> getPossibleSolutionList() {
+        return possibleSolutionList;
+    }
+
+    /**
+     * @param absoluteSolutionList A list that contains possible solution numbers for the math doku, excluding values that are known to be in the same row/column.
+     */
+    public void setAbsoluteSolutionList(List<Integer> absoluteSolutionList) {
+        this.absoluteSolutionList = absoluteSolutionList;
+    }
+
+    /**
+     * @return A list that contains the possible solution numbers for the math doku, excluding values that are known to be in the same row/column.
+     */
+    public List<Integer> getAbsoluteSolutionList() {
+        return absoluteSolutionList;
+    }
+    
+    /**
+     * @param possibleSolutionNumber A number that is possibly a solution to the math doku.
+     */
+    public void setPossibleSolutionNumber(int possibleSolutionNumber) {
+        this.possibleSolutionNumber = possibleSolutionNumber;
+    }
+
+    /**
+     * @return A number that is possibly a solution to the math doku.
+     */
+    public int getPossibleSolutionNumber() {
+        return possibleSolutionNumber;
+    }
+
+    /**
+     * @param finalSolutionNumber A number that is a solution to the math doku.
+     */
+    public void setFinalSolutionNumber(int finalSolutionNumber) {
+        this.finalSolutionNumber = finalSolutionNumber;
+        possibleSolutionNumber = finalSolutionNumber;
+    }
+
+    /**
+     * @return A number that is a solution to the math doku.
+     */
+    public int getFinalSolutionNumber() {
+        return finalSolutionNumber;
     }
 
     /**
@@ -180,6 +225,8 @@ public class MathDokuCell extends StackPane{
         boolean maths = mathDokuModel.checkMaths(true);
         boolean allCellsFilled = mathDokuModel.checkAllCellsFilled();
         
+        System.out.println(rowsColumns);
+
         if (rowsColumns && maths && allCellsFilled){
             //TODO: make an actual winning animation or alert
             System.out.println("You won!!!! Yay");
@@ -199,6 +246,15 @@ public class MathDokuCell extends StackPane{
         this.mathDokuModel = mathDokuModel;
         int dimensions = mathDokuModel.getCellDimensions();
 
+        //setup solutions for solver to use
+        for (int i = 1; i <= mathDokuModel.getGridDimensions(); i++) {
+            possibleSolutionList.add(i);
+            
+            absoluteSolutionList.add(Integer.valueOf(i));
+        }
+        //no valid solution number yet
+        finalSolutionNumber = 0;
+
         //do resizable canvas
         mathDokuCanvas = new MathDokuCanvas();
         getChildren().add(mathDokuCanvas);
@@ -206,14 +262,6 @@ public class MathDokuCell extends StackPane{
         // Bind canvas size to stack pane size.
         mathDokuCanvas.widthProperty().bind(realWidthProperty());
         mathDokuCanvas.heightProperty().bind(realHeightProperty());
-        
-        /*
-        realWidthProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println(realWidthProperty());
-            System.out.println(prefWidthProperty());
-            System.out.println(mathDokuCanvas.widthProperty());
-        });
-        */
 
 
         //setup main number label and targetNumber
