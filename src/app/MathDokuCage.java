@@ -2,10 +2,8 @@ package app;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import javafx.scene.paint.Color;
 
@@ -26,11 +24,6 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
     private String sign;
     private boolean display = false;
     private Random rand = new Random();
-    private int gridDimensions;
-
-    public MathDokuCage(int gridDimensions){
-        this.gridDimensions = gridDimensions;
-    }
 
     /**
      * Sets the cage's maths target.
@@ -79,12 +72,12 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             } else if (sign.equals("-")){
                 sum = 0;
                 ArrayList<Integer> list = new ArrayList<Integer>();
-                //sort low to high first (for this can be any order). Does prevent negative targets
+                //sort low to high first (for this can be any order). Does prevent negative targets.
                 for (MathDokuCell mathDokuCell : this){
                     list.add(Integer.parseInt(mathDokuCell.getNumber()));
                 }
-                list.sort(null); //low to high
-                //then check subtraction
+                list.sort(null); //low to high.
+                //then check subtraction.
                 for (Integer integer : list) {
                     sum = integer-sum;
                 }
@@ -100,12 +93,12 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 for (MathDokuCell mathDokuCell : this){
                     list.add(Integer.parseInt(mathDokuCell.getNumber()));
                 }
-                list.sort(null); //must be low to high otherwise it doesnt work
-                //then check division
+                list.sort(null); //must be low to high otherwise it doesnt work.
+                //then check division.
                 for (Integer integer : list) {
                     sum = (float)integer/sum;
                 }
-                //otherwise use Collections.sort(list)
+                //otherwise use Collections.sort(list).
 
             }
 
@@ -121,7 +114,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 return false;
             }
         } catch (NumberFormatException e) {
-            //cell not filled in yet so dont highlight as wrong
+            //cell not filled in yet so dont highlight as wrong.
             return true;
         }
     }
@@ -139,7 +132,8 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             do {
                 num = rand.nextInt(gridDimensions);
                 get(0).setFinalSolutionNumber(num);
-                get(0).setPossibleSolutionList(new ArrayList<Integer>(Arrays.asList(num)));
+                //add number with highest priority
+                get(0).getPossibleSolutionList().setAbsoluteNumber(num);
                 targetNumber = num;
             } while (num == 0);
         }
@@ -157,35 +151,35 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             boolean division = true;
             int divisionSolution = 0;
 
-            //check all division rules work before allowing division as an option
+            //check all division rules work before allowing division as an option.
             int divisionQuotient = 1;
 
-            //check if the numbers can divide each other without leaving remainders
+            //check if the numbers can divide each other without leaving remainders.
             for (int i = 0; i < size(); i++) {
                 for (int j = 0; j < size(); j++) {
                     int x = get(i).getFinalSolutionNumber();
                     int y = get(j).getFinalSolutionNumber();
-                    //check if the remainder is zero and that the number is not the same
+                    //check if the remainder is zero and that the number is not the same.
                     //TODO: check all division combinations
                     if ((x%y)%divisionQuotient == 0 && x/y != 1){
-                        //pair is divisible, save to test with the next value and skip the for loop
+                        //pair is divisible, save to test with the next value and skip the for loop.
                         divisionQuotient = (x/y)/divisionQuotient;
                         break;
                     }
                 }
             }
 
-            //check that the divisonQuotient has actually changed
+            //check that the divisonQuotient has actually changed.
             if (divisionQuotient != 1){
                 division = true;
-                //divison solution is divisionQuotient
+                //divison solution is divisionQuotient.
                 divisionSolution = divisionQuotient;
             } else {
                 division = false;
             }
 
             
-            //now decide what sign to use
+            //now decide what sign to use.
             while (true){
                 int signNum = rand.nextInt(4);
                 if (signNum == 0){
@@ -197,8 +191,8 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     sign = "+";
                     break;
                 }
-                //more complicated
-                //TODO: finish this
+                //more complicated.
+                //TODO: finish this.
                 else if (signNum == 1){
                     
                     targetNumber = 0;
@@ -213,7 +207,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     sign = "x";
                     break;
                 } 
-                //division is the only sign that sometimes cannot be used
+                //division is the only sign that sometimes cannot be used.
                 else if (signNum == 3 && division){
                     targetNumber = divisionSolution;
                     sign = "÷";
@@ -221,14 +215,14 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 }
             }
             
-            //TODO: check that the sign can be used, if it cant then regenerate the random number and try again
+            //TODO: check that the sign can be used, if it cant then regenerate the random number and try again.
         }
     }
 
     /**
-     * Decides if the target should be returned or not.
+     * Only lets the first cell in the cage display the target.
      * 
-     * @return What to display in the grid, either nothing or the target
+     * @return What to display in the grid, either nothing or the target.
      */
     public String display(){
         if (display){

@@ -257,7 +257,7 @@ public class MathDoku extends Application {
         loadTextButton.setOnAction(new LoadTextEventHandler());
 
         autoGenerateButton.setOnAction(e -> {
-            gridDimensions = 6;
+            gridDimensions = 3;
             mathDokuModel.setCellDimensions(60);
             mathDokuModel.setGridDimensions(gridDimensions);
             startMainGame(stage, new ArrayList<String>());
@@ -586,7 +586,8 @@ public class MathDoku extends Application {
         if (list.isEmpty()){
             //generate random
             //mathDokuModel.generateDefault2Grid();
-            mathDokuModel.generateDefault6Grid();
+            mathDokuModel.generateDefault3Grid();
+            //mathDokuModel.generateDefault6Grid();
             //mathDokuModel.generateNewGrid();
         } else {
             mathDokuModel.generateFromList(list);
@@ -637,27 +638,37 @@ public class MathDoku extends Application {
 
             //check formatting
             for (String line : text.split(System.lineSeparator())) {
-                String[] array1 = line.split(" ");
-                String[] targetArray = array1[0].split("");
-                String[] numberArray = array1[1].split(",");
+                String[] array = line.split(" ");
+                String[] targetArray = array[0].split("");
+                String[] numberArray = array[1].split(",");
 
-                for (int i = 0; i < targetArray.length-1; i++) {
+                //allow single cages with no maths symbol.
+                if (targetArray.length == 1){
                     try {
-                        Integer.parseInt(targetArray[i]);
+                        Integer.parseInt(targetArray[0]);
                     } catch (NumberFormatException e) {
+                        return true;
+                    }
+                } else {  
+                    for (int i = 0; i < targetArray.length-1; i++) {
+                        try {
+                            Integer.parseInt(targetArray[i]);
+                        } catch (NumberFormatException e) {
+                            return true;
+                        }
+                    }
+
+                    if (!targetArray[targetArray.length-1].matches("\\+|-|x|÷")){
                         return true;
                     }
                 }
 
-                if (!targetArray[targetArray.length-1].matches("\\+|-|x|÷")){
-                    return true;
-                }
 
                 //if there is only one cell
-                if (numberArray.length == 0){
+                if (numberArray.length == 1){
                     try {
-                        Integer.parseInt(array1[1]);
-                        allNumbersList.add(new Integer[] {Integer.parseInt(array1[1])});
+                        Integer.parseInt(numberArray[0]);
+                        allNumbersList.add(new Integer[] {Integer.parseInt(array[1])});
                     } catch (NumberFormatException e) {
                         return true;
                     }

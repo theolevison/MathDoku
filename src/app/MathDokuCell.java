@@ -1,9 +1,7 @@
 package app;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 import javafx.beans.property.DoubleProperty;
@@ -13,7 +11,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -42,10 +39,9 @@ public class MathDokuCell extends StackPane{
     private Stack<String> redoStack = new Stack<String>();
     private int finalSolutionNumber;
     private int possibleSolutionNumber;
-    private List<Integer> possibleSolutionList = new ArrayList<Integer>();
-    private List<Integer> absoluteSolutionList = new ArrayList<Integer>();
+    private PossibleSolutionList possibleSolutionList;
  
-    // To get around stack pane not resizing use a property I can bind to and then bind off of
+    // To get around stack pane not resizing, use a property I can bind to, and then bind off of that
     // Define all that is needed for that
     private DoubleProperty realWidth = new SimpleDoubleProperty(30);
     public final double getRealWidth(){return realWidth.get();}
@@ -58,32 +54,12 @@ public class MathDokuCell extends StackPane{
     public final void setRealHeight(double value){realHeight.set(value);}
     public DoubleProperty realHeightProperty() {return realHeight;}
 
-    /**
-     * @param possibleSolutionSet A list that contains possible solution numbers for the math doku.
-     */
-    public void setPossibleSolutionList(List<Integer> possibleSolutionList) {
-        this.possibleSolutionList = possibleSolutionList;
-    }
 
     /**
-     * @return A list that contains possible solution numbers for the math doku.
+     * @return A kind of list that contains possible solution numbers for the math doku.
      */
-    public List<Integer> getPossibleSolutionList() {
+    public PossibleSolutionList getPossibleSolutionList() {
         return possibleSolutionList;
-    }
-
-    /**
-     * @param absoluteSolutionList A list that contains possible solution numbers for the math doku, excluding values that are known to be in the same row/column.
-     */
-    public void setAbsoluteSolutionList(List<Integer> absoluteSolutionList) {
-        this.absoluteSolutionList = absoluteSolutionList;
-    }
-
-    /**
-     * @return A list that contains the possible solution numbers for the math doku, excluding values that are known to be in the same row/column.
-     */
-    public List<Integer> getAbsoluteSolutionList() {
-        return absoluteSolutionList;
     }
     
     /**
@@ -246,12 +222,8 @@ public class MathDokuCell extends StackPane{
         this.mathDokuModel = mathDokuModel;
         int dimensions = mathDokuModel.getCellDimensions();
 
-        //setup solutions for solver to use
-        for (int i = 1; i <= mathDokuModel.getGridDimensions(); i++) {
-            possibleSolutionList.add(i);
-            
-            absoluteSolutionList.add(Integer.valueOf(i));
-        }
+        possibleSolutionList = new PossibleSolutionList(mathDokuModel.getGridDimensions());
+
         //no valid solution number yet
         finalSolutionNumber = 0;
 
