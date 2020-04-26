@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.TimeUnit;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Scale;
 
 /**
  * Handles the game rules, generating problems and genrating solutions.
@@ -19,13 +19,13 @@ import javafx.scene.transform.Scale;
 public class MathDokuModel {
     private MathDokuCell prevCell;
     private MathDokuCell currentCell;
-    private int cellDimensions;
     private int gridDimensions;
     private MathDokuCell[][] grid;
     private ArrayList<MathDokuCage> cages = new ArrayList<MathDokuCage>();
     public Stack<MathDokuCell> undoStack = new Stack<MathDokuCell>();
     public Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
     private MathDoku mathDoku;
+    private Boolean highlight = true;
 
     /**
      * Constructor, reference to mathDoku required for undo/redo.
@@ -37,6 +37,14 @@ public class MathDokuModel {
      */
     public MathDokuModel(MathDoku mathDoku) {
         this.mathDoku = mathDoku;
+    }
+
+    public void setHighlight(Boolean highlight) {
+        this.highlight = highlight;
+    }
+
+    public Boolean getHighlight() {
+        return highlight;
     }
 
     /**
@@ -95,8 +103,7 @@ public class MathDokuModel {
      * @return The currently selected cell.
      */
     public MathDokuCell getCurrentCell() {
-        undoStack.push(currentCell);
-        System.out.println("added to undo stack");
+        //pushToUndoStack(currentCell);
         return this.currentCell;
     }
 
@@ -116,19 +123,10 @@ public class MathDokuModel {
         this.currentCell = currentCell;
     }
 
-    /**
-     * @return Cell dimensions.
-     */
-    public int getCellDimensions() {
-        return this.cellDimensions;
-    }
-
-    /**
-     * @param cellDimensions The dimensions that the cell should be.
-     */
-    public void setCellDimensions(int cellDimensions) {
-        this.cellDimensions = cellDimensions;
-    }
+    private DoubleProperty cellDimensions = new SimpleDoubleProperty(60);
+    public final double getCellDimensions(){return cellDimensions.get();}
+    public final void setCellDimensions(double value){cellDimensions.set(value);}
+    public DoubleProperty cellDimensionsProperty() {return cellDimensions;}
 
     /**
      * @return The previously selected cell.
@@ -358,7 +356,7 @@ public class MathDokuModel {
                 cell.setColumnConflict(false);
             }
         }
-        check(true);
+        check();
 
     }
 
@@ -562,7 +560,7 @@ public class MathDokuModel {
      * @param highlight Whether or not to highlight the cells.
      * @return If the maths is correct.
      */
-    public boolean checkMaths(boolean highlight) {
+    public boolean checkMaths() {
         boolean check = true;
 
         for (MathDokuCage mathDokuCage : cages) {
@@ -599,7 +597,7 @@ public class MathDokuModel {
      *                  user's decision.
      * @return True if there are no conflicts.
      */
-    public boolean check(boolean highlight) {
+    public boolean check() {
         // have to initalise these to make the compiler stop complaining
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
@@ -664,18 +662,34 @@ public class MathDokuModel {
             }
         }
         return globalFlag;
-        //return noColumnConflict && noRowConflict;
+    }
+
+
+    /**
+     * Checks if the cage's math's rules are being followed when auto solving.
+     * 
+     * @return If the maths is correct.
+     */
+    public boolean checkMathsSolutions() {
+        boolean check = true;
+
+        for (MathDokuCage mathDokuCage : cages) {
+            if (!mathDokuCage.checkMathsSolutions()) {
+                check = false;
+            }
+        }
+
+        return check;
     }
 
     // TODO: idk try to merge with above, not likely to happen tbh
     /**
-     * Checks the solution numbers for row and column conflicts according to sudoku
-     * rules, does not highlight.
+     * Checks the solution numbers for row and column conflicts according to sudoku rules, does not highlight.
      * 
      * @return True there are no conflicts.
      */
     public boolean checkSolutions() {
-        // have to initalise these to make the compiler stop complaining
+        // have to initalise these to make the compiler stop complaining.
         boolean noColumnConflict = false;
         boolean noRowConflict = false;
         boolean globalFlag = true;
@@ -687,7 +701,7 @@ public class MathDokuModel {
             noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
 
-                // attempt to add number to columnSet, check if there is a conflict
+                // attempt to add number to columnSet, check if there is a conflict.
                 try {
                     if (!columnSet.add(grid[i][j].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
@@ -695,19 +709,18 @@ public class MathDokuModel {
                             noColumnConflict = false;
                             globalFlag = false;
                         }
-                        // only need to find the first conflict, so move to the next column
-                        // break;
+                        // only need to find the first conflict, so move to the next column.
                     } else if (noColumnConflict) {
-                        // everything is correct
+                        // everything is correct.
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(false);
                         }
                     }
                 } catch (NumberFormatException e) {
-                    // Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught.
                 }
 
-                // attempt to add number to rowSet, check if there is a conflict
+                // attempt to add number to rowSet, check if there is a conflict.
                 try {
                     if (!rowSet.add(grid[j][i].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
@@ -715,25 +728,37 @@ public class MathDokuModel {
                             noRowConflict = false;
                             globalFlag = false;
                         }
-                        // only need to find the first conflict, so move to the next row
-                        // break;
+                        // only need to find the first conflict, so move to the next row.
                     } else if (noRowConflict) {
-                        // everything is correct
+                        // everything is correct.
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(false);
                         }
                     }
                 } catch (NumberFormatException e) {
-                    // Not all cells filled in so error thrown and caught
+                    // Not all cells filled in so error thrown and caught.
                 }
             }
         }
         return globalFlag;
-        //return noColumnConflict && noRowConflict;
+    }
+
+    public void hint() {
+        Random rand = new Random();
+        
+        MathDokuCell cell;
+        //ensure cell has not been filled in yet.
+        do {
+            cell = grid[rand.nextInt(gridDimensions)][rand.nextInt(gridDimensions)];
+        } while (cell.getNumber() != "");
+
+        System.out.println("hinted");
+
+        //randomly reveal a cell's solution.
+        cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
     }
 
     public void solve() {
-
         // check for single cells.
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -788,11 +813,9 @@ public class MathDokuModel {
             // set should never be empty at this point fingers crossed.
 
             if (cell.getPossibleSolutionList().isEmpty()) {
-                // options exhausted here so the error is higher up, so reset possible solution list to known values.
+                // options exhausted here so the error is higher up.
 
-                //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
-                //cell.setPossibleSolutionList(new ArrayList<Integer>(cell.getAbsoluteSolutionList()));
-                System.out.println("Childless and list exhausted, go back 1");
+                System.out.println("Disappointed parent and exhausted, go back once.");
                 return false;
             }
 
@@ -802,7 +825,7 @@ public class MathDokuModel {
 
 
         //eliminate that number from other cell's possibility sets in the same row/column.
-        //No arguments with parents, only delete from cells in front and below.
+        //No arguments with parents, only try to delete from cells in front and below.
         for (int k = 0; k < gridDimensions; k++) {
             if (k > j){
                 //column.
@@ -815,32 +838,38 @@ public class MathDokuModel {
         }
 
         boolean success = false;
-        if (i < gridDimensions - 1){
-            success = solveRecursively(i+1, j);
-        } else if (j < gridDimensions - 1){
-            success = solveRecursively(0, j+1);
-        } else {
-            //i = 5 and j =5
-            success = checkSolutions();
-            System.out.println(success);
+        /*
+        if (checkMathsSolutions()){
+            */
+            if (i < gridDimensions - 1){
+                success = solveRecursively(i+1, j);
+            } else if (j < gridDimensions - 1){
+                success = solveRecursively(0, j+1);
+            } else {
+                //i = 5 and j =5
+                success = checkSolutions();// && checkMathsSolutions();
+            }
+            /*
         }
+        */
 
         if (!success && !cell.getPossibleSolutionList().isEmpty()){
             //error but more options available so remove this attempt and try those.
 
-            System.out.println("Disappointed parent, try to make more children");
-            //restore unused option to other cells in the same row/column.
+            System.out.println("Disappointed parent, try to make more children.");
+            //try to restore unused option to other cells in the same row/column.
 
             //No sex with parents, only restore cells in front and below.
-
             for (int k = 0; k < gridDimensions; k++) {
                 if (k > j){
                     //column.
                     grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j);
+                    //grid[i][k].setPossibleSolutionNumber(0);
                 }
                 if (k > i){
                     //row.
                     grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j);
+                    //grid[k][j].setPossibleSolutionNumber(0);
                 }
             }
 
@@ -848,17 +877,16 @@ public class MathDokuModel {
 
             return solveRecursively(i, j);
 
-        } else if (!success && cell.getPossibleSolutionList().isEmpty()) {
-            //options exhausted here so the error is higher up, so reset possible solution list to known values.
-
-            //DONT PASS OBJECTS BY REFERENCE MAKE A NEW COPY!!!!!!!
-            //cell.setPossibleSolutionList(new ArrayList<Integer>(cell.getAbsoluteSolutionList()));
-            System.out.println("Disappointed parent and exhausted, go back 1");
+        }
+        //TODO: remove this bit after I get maths checking working, I think it's redundant but I want to be sure.
+        else if (!success && cell.getPossibleSolutionList().isEmpty()) {
+            //options exhausted here so the error is higher up.
+            System.out.println("\n\n\nDisappointed parent and exhausted, go back once.\n\n\n");
             return false;
         }
 
         //this branch was successful, but the overall attempt may not be, so go up.
-        System.out.println("Branch success: go up");
+        System.out.println("Proud parent: go up");
         return true;
     }
 }
