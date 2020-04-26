@@ -226,7 +226,7 @@ public class MathDokuCell extends StackPane{
      */
     public MathDokuCell(MathDokuModel mathDokuModel){
         this.mathDokuModel = mathDokuModel;
-        double dimensions = mathDokuModel.getCellDimensions();
+        double dimensions = 60;
 
         possibleSolutionList = new PossibleSolutionList(mathDokuModel.getGridDimensions());
 
@@ -247,7 +247,7 @@ public class MathDokuCell extends StackPane{
 
         //setup main number label and targetNumber
         mainNumber = new Label(number);
-        mainNumber.setFont(new Font("Arial", dimensions / 2));
+        mainNumber.setFont(new Font("Arial", dimensions));
         mainNumber.setStyle("-fx-font-weight: bold");
         mainNumber.setMaxWidth(dimensions);
 
@@ -256,7 +256,7 @@ public class MathDokuCell extends StackPane{
         //mainNumber.prefHeightProperty().bind(realHeightProperty());
 
         targetNumber = new Label("12+");
-        targetNumber.setFont(new Font("Arial", dimensions / 6));
+        targetNumber.setFont(new Font("Arial", dimensions / 3));
 
         //TODO: add listener to change font size
 
@@ -266,12 +266,31 @@ public class MathDokuCell extends StackPane{
         //add all nodes to the stack
         getChildren().addAll(mainNumber, targetNumber);
         setAlignment(Pos.CENTER);
-        setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
+        setMargin(targetNumber, new Insets(0, dimensions*1.5, dimensions*1.5, 0));
 
-        mathDokuModel.cellDimensionsProperty().addListener((observable, oldValue, newValue) -> {
-            mainNumber.setStyle("-fx-font-size: " + (double)newValue*2);
-            targetNumber.setStyle("-fx-font-size: " + newValue);
+        realHeightProperty().addListener(e -> {
+            setMargin(targetNumber, new Insets(0, getRealWidth()*0.75, getRealHeight()*0.6, 0));
+            double fontSize = Math.floor(Math.sqrt(getRealHeight() * getRealWidth()));
+            mainNumber.setStyle("-fx-font-size: " + (double) mathDokuModel.getCellDimensions() *fontSize*2.5);
+            targetNumber.setStyle("-fx-font-size: " + (double) mathDokuModel.getCellDimensions() *fontSize);
         });
+
+        realWidthProperty().addListener(e -> {
+            setMargin(targetNumber, new Insets(0, getRealWidth()*0.75, getRealHeight()*0.6, 0));
+            double fontSize = Math.floor(Math.sqrt(getRealHeight() * getRealWidth()));
+            mainNumber.setStyle("-fx-font-size: " + (double) mathDokuModel.getCellDimensions() *fontSize*2.5);
+            targetNumber.setStyle("-fx-font-size: " + (double) mathDokuModel.getCellDimensions() *fontSize);
+        });
+
+        
+        mathDokuModel.cellDimensionsProperty().addListener((observable, oldValue, newValue) -> {
+            setMargin(targetNumber, new Insets(0, getRealWidth()*0.75, getRealHeight()*0.6, 0));
+            double fontSize = Math.floor(Math.sqrt(getRealHeight() * getRealWidth()));
+            mainNumber.setStyle("-fx-font-size: " + (double)newValue*fontSize*2.5);
+            targetNumber.setStyle("-fx-font-size: " + (double)newValue*fontSize);
+        });
+        
+        
         
         /**
          * Allows the user to select this cell.

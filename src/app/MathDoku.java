@@ -169,7 +169,7 @@ public class MathDoku extends Application {
                         }
 
                         // update dimensions and start the main game
-                        mathDokuModel.setCellDimensions(60);
+                        mathDokuModel.setCellDimensions(0.07);
                         mathDokuModel.setGridDimensions(gridDimensions);
                         startMainGame(stage, list);
                     } catch (Exception e) {
@@ -256,7 +256,7 @@ public class MathDoku extends Application {
                     }
 
                     // update dimensions and start the main game
-                    mathDokuModel.setCellDimensions(60);
+                    mathDokuModel.setCellDimensions(0.07);
                     mathDokuModel.setGridDimensions(gridDimensions);
                     startMainGame(stage, list);
                 });
@@ -269,7 +269,7 @@ public class MathDoku extends Application {
 
         autoGenerateButton.setOnAction(e -> {
             gridDimensions = 3;
-            mathDokuModel.setCellDimensions(60);
+            mathDokuModel.setCellDimensions(0.07);
             mathDokuModel.setGridDimensions(gridDimensions);
             startMainGame(stage, new ArrayList<String>());
         });
@@ -508,9 +508,10 @@ public class MathDoku extends Application {
         largeTextButton.prefWidthProperty().bind(textSizeHBox.widthProperty());
         largeTextButton.prefHeightProperty().bind(textSizeHBox.widthProperty());
 
-        smallTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(15));
-        midTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(20));
-        largeTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(25));
+        //set text size scaled to the cell size
+        smallTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(0.1));
+        midTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(0.12));
+        largeTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(0.15));
 
         textSizeHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
 

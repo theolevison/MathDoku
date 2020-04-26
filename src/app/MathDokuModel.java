@@ -25,7 +25,7 @@ public class MathDokuModel {
     public Stack<MathDokuCell> undoStack = new Stack<MathDokuCell>();
     public Stack<MathDokuCell> redoStack = new Stack<MathDokuCell>();
     private MathDoku mathDoku;
-    private Boolean highlight = true;
+    private Boolean highlight = false;
 
     /**
      * Constructor, reference to mathDoku required for undo/redo.
@@ -123,7 +123,7 @@ public class MathDokuModel {
         this.currentCell = currentCell;
     }
 
-    private DoubleProperty cellDimensions = new SimpleDoubleProperty(60);
+    private DoubleProperty cellDimensions = new SimpleDoubleProperty(0.07);
     public final double getCellDimensions(){return cellDimensions.get();}
     public final void setCellDimensions(double value){cellDimensions.set(value);}
     public DoubleProperty cellDimensionsProperty() {return cellDimensions;}
