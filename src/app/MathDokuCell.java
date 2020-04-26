@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -53,6 +55,11 @@ public class MathDokuCell extends StackPane{
     public final double getRealHeight(){return realHeight.get();}
     public final void setRealHeight(double value){realHeight.set(value);}
     public DoubleProperty realHeightProperty() {return realHeight;}
+
+    private BooleanProperty win = new SimpleBooleanProperty();
+    //public final Boolean getWin(){return win.get();}
+    public final void setWin(Boolean value){win.set(value);}
+    public BooleanProperty winProperty() {return win;}
 
 
     /**
@@ -191,21 +198,20 @@ public class MathDokuCell extends StackPane{
      * @param newNumber The number the user wants to enter into this cell.
      */
     private void setNumber(String newNumber){
+        mathDokuModel.pushToUndoStack(this);
         undoStack.push(number);
         
         number = newNumber;
         mainNumber.setText(newNumber);
         
-        //TODO: check if the show errors button is toggled and pass it in as a parameter
-        boolean rowsColumns = mathDokuModel.check(true);
-        boolean maths = mathDokuModel.checkMaths(true);
+        boolean rowsColumns = mathDokuModel.check();
+        boolean maths = mathDokuModel.checkMaths();
         boolean allCellsFilled = mathDokuModel.checkAllCellsFilled();
-        
-        System.out.println(rowsColumns);
 
         if (rowsColumns && maths && allCellsFilled){
             //TODO: make an actual winning animation or alert
             System.out.println("You won!!!! Yay");
+            win.set(true);
         }
         mathDokuModel.toggleUndoRedo();
     }
@@ -220,12 +226,15 @@ public class MathDokuCell extends StackPane{
      */
     public MathDokuCell(MathDokuModel mathDokuModel){
         this.mathDokuModel = mathDokuModel;
-        int dimensions = mathDokuModel.getCellDimensions();
+        double dimensions = mathDokuModel.getCellDimensions();
 
         possibleSolutionList = new PossibleSolutionList(mathDokuModel.getGridDimensions());
 
+        win.set(false);
+
         //no valid solution number yet
         finalSolutionNumber = 0;
+        //possibleSolutionNumber = 0;
 
         //do resizable canvas
         mathDokuCanvas = new MathDokuCanvas();
@@ -258,6 +267,11 @@ public class MathDokuCell extends StackPane{
         getChildren().addAll(mainNumber, targetNumber);
         setAlignment(Pos.CENTER);
         setMargin(targetNumber, new Insets(0, dimensions*5/8, dimensions*3/4, 0));
+
+        mathDokuModel.cellDimensionsProperty().addListener((observable, oldValue, newValue) -> {
+            mainNumber.setStyle("-fx-font-size: " + (double)newValue*2);
+            targetNumber.setStyle("-fx-font-size: " + newValue);
+        });
         
         /**
          * Allows the user to select this cell.

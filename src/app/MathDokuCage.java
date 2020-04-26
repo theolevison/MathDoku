@@ -119,6 +119,58 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
         }
     }
 
+    //TODO: make this merge with above
+    public boolean checkMathsSolutions(){
+
+        for (MathDokuCell mathDokuCell : this){
+            if (mathDokuCell.getPossibleSolutionNumber() == 0){
+                //not finished solving yet so return true;
+                return true;
+            }
+        }
+        
+        float sum;
+        if (sign.equals("+")){
+            sum = 0;
+            for (MathDokuCell mathDokuCell : this){
+                sum += mathDokuCell.getPossibleSolutionNumber();
+            }
+        } else if (sign.equals("-")){
+            sum = 0;
+            ArrayList<Integer> list = new ArrayList<Integer>();
+            //sort low to high first (for this can be any order). Does prevent negative targets.
+            for (MathDokuCell mathDokuCell : this){
+                list.add(mathDokuCell.getPossibleSolutionNumber());
+            }
+            list.sort(null); //low to high.
+            //then check subtraction.
+            for (Integer integer : list) {
+                sum = integer-sum;
+            }
+        } else if (sign.equals("x")){
+            sum = 1;
+            for (MathDokuCell mathDokuCell : this){
+                sum = sum * mathDokuCell.getPossibleSolutionNumber();
+            }
+        } else {
+            sum = 1;
+            List<Integer> list = new ArrayList<Integer>();
+            //sort low to high first
+            for (MathDokuCell mathDokuCell : this){
+                list.add(mathDokuCell.getPossibleSolutionNumber());
+            }
+            list.sort(null); //must be low to high otherwise it doesnt work.
+            //then check division.
+            for (Integer integer : list) {
+                sum = (float)integer/sum;
+            }
+            //otherwise use Collections.sort(list).
+
+        }
+
+        return sum == targetNumber;
+    }
+
     /**
      * If the cage size is 1, generate a target number.
      * <p>

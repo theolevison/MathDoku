@@ -14,8 +14,10 @@ public class PossibleSolutionList{
     }
 
     public boolean add(Integer number, Integer priorityInt) {
-        if (priorityInt < priority[number-1]){
+        if (priorityInt <= priority[number-1]){
             numberEnabled[number-1] = true;
+            //TODO: without the below the priority system doesnt actually work ssoooooo
+            //priority[number-1] = priorityInt;
             return true;
         } else {
             return false;
@@ -30,12 +32,14 @@ public class PossibleSolutionList{
     }
 
     public boolean remove(Integer number, Integer priorityInt) {
-        if (priorityInt < priority[number-1]){
+        //if (priorityInt <= priority[number-1]){
             numberEnabled[number-1] = false;
+            //priority[number-1] = priorityInt;
             return true;
-        } else {
+        /*} else {
             return false;
         } 
+        */
     }
 
     public Integer get() {

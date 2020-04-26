@@ -28,9 +28,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
-
 /**
- * Handles creating the GUI and running the game of MathDoku, extends Application.
+ * Handles creating the GUI and running the game of MathDoku, extends
+ * Application.
  * <p>
  * All other classes are instansiated here.
  * 
@@ -50,42 +50,45 @@ public class MathDoku extends Application {
     private final int WINDOW_HEIGHT = 700;
 
     /**
-     * Allows the user to press the undo button if there are operations in the undo stack.
+     * Allows the user to press the undo button if there are operations in the undo
+     * stack.
      * 
      * @param bool If the undo button should be enabled or not
      */
-    public void enableDisableUndo(boolean bool){
+    public void enableDisableUndo(boolean bool) {
         undoButton.setDisable(bool);
     }
 
     /**
-     * Allows the user to press the redo button if there are operations in the redo stack.
+     * Allows the user to press the redo button if there are operations in the redo
+     * stack.
      * 
      * @param bool If the redo button should be enabled or not
      */
-    public void enableDisableRedo(boolean bool){
+    public void enableDisableRedo(boolean bool) {
         redoButton.setDisable(bool);
     }
 
     /**
-     * Start method for javaFX that sets up the GUI and gets the user to select a game.
+     * Start method for javaFX that sets up the GUI and gets the user to select a
+     * game.
      * <p>
-     * Handles loading games from saves.
-     * Is called by javaFX once the launch method has been called.
+     * Handles loading games from saves. Is called by javaFX once the launch method
+     * has been called.
      * 
-     * @param stage A javaFX object that represents the GUI, all javaFX objects must be added to it.
+     * @param stage A javaFX object that represents the GUI, all javaFX objects must
+     *              be added to it.
      */
     @Override
     public void start(Stage stage) {
 
-        
-        //TODO: add slider to select grid dimensions when generating a random game
+        // TODO: add slider to select grid dimensions when generating a random game
 
-        //setup title page
-        Text title = new Text (10, 20, "MathDoku");
+        // setup title page
+        Text title = new Text(10, 20, "MathDoku");
         title.setId("title");
 
-        //load option buttons
+        // load option buttons
         HBox loadOptionsHBox = new HBox();
         Button loadFileButton = new Button("Load from file");
         Button loadTextButton = new Button("Load from text");
@@ -103,12 +106,13 @@ public class MathDoku extends Application {
         loadOptionsHBox.setMaxHeight(100);
         loadOptionsHBox.setMaxWidth(WINDOW_WIDTH);
 
-        //loadOptionsHBox.setPrefSize(window_width, window_height);
-        //loadOptionsHBox.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-
+        // loadOptionsHBox.setPrefSize(window_width, window_height);
+        // loadOptionsHBox.setMaxSize(Region.USE_COMPUTED_SIZE,
+        // Region.USE_COMPUTED_SIZE);
 
         /**
-         * Lets the user select save files and if valid, loads the resulting grid to the GUI.
+         * Lets the user select save files and if valid, loads the resulting grid to the
+         * GUI.
          * <p>
          * Ensures that the save file is in the correct format and that cages are valid.
          * 
@@ -117,11 +121,13 @@ public class MathDoku extends Application {
         class LoadFileEventHandler implements EventHandler<ActionEvent> {
 
             /**
-             * Handles the user pressing the load file button by generating a file load dialog.
+             * Handles the user pressing the load file button by generating a file load
+             * dialog.
              * <p>
-             * Checks the file selected by the user for formatting and valid cages, if the file is erroneous a warning dialog is generated and the system resets.
-             * If the file is valid then the save is loaded into the grid.
-             * The user is able to close the dialog if they no longer want to load a save.
+             * Checks the file selected by the user for formatting and valid cages, if the
+             * file is erroneous a warning dialog is generated and the system resets. If the
+             * file is valid then the save is loaded into the grid. The user is able to
+             * close the dialog if they no longer want to load a save.
              * 
              * @param arg0 an ActionEvent, not actually used for anything.
              */
@@ -130,29 +136,31 @@ public class MathDoku extends Application {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Select a MathDoku file");
                 File file = fileChooser.showOpenDialog(stage);
-                
-                if (file != null){
+
+                if (file != null) {
                     try {
                         BufferedReader br = new BufferedReader(new FileReader(file));
                         List<String> list = new ArrayList<String>();
 
                         String tempString;
                         String text = "";
-                        while ((tempString = br.readLine()) != null){
+                        while ((tempString = br.readLine()) != null) {
                             list.add(tempString);
                             text += tempString + System.lineSeparator();
                         }
 
                         br.close();
 
-                        //check it meets the correct formatting, otherwise create an alert
-                        if (isInvalid(text)){
-                            Alert alert = new Alert(Alert.AlertType.WARNING, "The file you selected is not formatted correctly");
+                        // check it meets the correct formatting, otherwise create an alert
+                        if (isInvalid(text)) {
+                            Alert alert = new Alert(Alert.AlertType.WARNING,
+                                    "The file you selected is not formatted correctly");
                             alert.setTitle("Incorrect format");
                             alert.setHeaderText("");
 
-                            //set background
-                            alert.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                            // set background
+                            alert.getDialogPane().getStylesheets()
+                                    .add(this.getClass().getResource("style.css").toExternalForm());
                             alert.getDialogPane().setId("formatWarningDialog");
 
                             alert.showAndWait();
@@ -160,34 +168,37 @@ public class MathDoku extends Application {
                             return;
                         }
 
-                        //update dimensions and start the main game
+                        // update dimensions and start the main game
                         mathDokuModel.setCellDimensions(60);
                         mathDokuModel.setGridDimensions(gridDimensions);
                         startMainGame(stage, list);
                     } catch (Exception e) {
-                        
+
                     }
                 }
             }
         }
 
         /**
-         * Asks the user for a text based save, if valid, loads the resulting grid to the GUI.
+         * Asks the user for a text based save, if valid, loads the resulting grid to
+         * the GUI.
          * <p>
-         * Generates a dialog that has a text box for the user to enter text.
-         * Ensures that the text provided is in the correct format and that cages are valid.
-         * The user is unable to load the save until it matches the correct format.
+         * Generates a dialog that has a text box for the user to enter text. Ensures
+         * that the text provided is in the correct format and that cages are valid. The
+         * user is unable to load the save until it matches the correct format.
          * 
          * @author Theo Levison
          */
         class LoadTextEventHandler implements EventHandler<ActionEvent> {
 
             /**
-             * Handles the user pressing the load text button by generating a text based save load dialog.
+             * Handles the user pressing the load text button by generating a text based
+             * save load dialog.
              * <p>
-             * Checks the text given by the user for formatting and valid cages, if the text is erroneous the user is unable to load the save.
-             * If the text is valid then the save is loaded into the grid.
-             * The user is able to close the dialog if they no longer want to load a save.
+             * Checks the text given by the user for formatting and valid cages, if the text
+             * is erroneous the user is unable to load the save. If the text is valid then
+             * the save is loaded into the grid. The user is able to close the dialog if
+             * they no longer want to load a save.
              * 
              * @param arg0 An ActionEvent, not actually used for anything.
              */
@@ -207,13 +218,12 @@ public class MathDoku extends Application {
                 TextArea textArea = new TextArea();
                 Label label = new Label("Please enter text with correct formatting");
 
-                
                 grid.add(label, 0, 0);
                 grid.add(textArea, 1, 0);
 
                 textDialog.getDialogPane().setContent(grid);
 
-                //set focus on the textArea
+                // set focus on the textArea
                 Platform.runLater(() -> textArea.requestFocus());
 
                 textDialog.setResultConverter(dialogButton -> {
@@ -223,33 +233,34 @@ public class MathDoku extends Application {
                     return null;
                 });
 
-                //set background
-                textDialog.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+                // set background
+                textDialog.getDialogPane().getStylesheets()
+                        .add(this.getClass().getResource("style.css").toExternalForm());
                 textDialog.getDialogPane().setId("textInputDialog");
-                
+
                 Button okButton = (Button) textDialog.getDialogPane().lookupButton(ButtonType.OK);
 
-                //disable the okay button if the format is incorrect
-                BooleanBinding isInvalidBinding = Bindings.createBooleanBinding(() -> isInvalid(textArea.getText()), textArea.textProperty());
+                // disable the okay button if the format is incorrect
+                BooleanBinding isInvalidBinding = Bindings.createBooleanBinding(() -> isInvalid(textArea.getText()),
+                        textArea.textProperty());
                 okButton.disableProperty().bind(isInvalidBinding);
 
-                //display dialog
+                // display dialog
                 Optional<String> result = textDialog.showAndWait();
 
-                //send the list of cages to mathDokuModel
-                result.ifPresent(resultString -> 
-                {
+                // send the list of cages to mathDokuModel
+                result.ifPresent(resultString -> {
                     List<String> list = new ArrayList<String>();
                     for (String line : resultString.split("\n")) {
                         list.add(line);
                     }
-                    
-                    //update dimensions and start the main game
+
+                    // update dimensions and start the main game
                     mathDokuModel.setCellDimensions(60);
                     mathDokuModel.setGridDimensions(gridDimensions);
                     startMainGame(stage, list);
                 });
-                
+
             }
         }
 
@@ -263,15 +274,15 @@ public class MathDoku extends Application {
             startMainGame(stage, new ArrayList<String>());
         });
 
-        //set title scene
+        // set title scene
 
         GridPane titleRoot = new GridPane();
         titleRoot.setAlignment(Pos.CENTER);
         titleRoot.setHgap(10);
         titleRoot.setVgap(10);
         titleRoot.setPadding(new Insets(10, 10, 10, 10));
-        
-        titleRoot.setPrefSize(WINDOW_WIDTH*0.6, WINDOW_HEIGHT*0.6);
+
+        titleRoot.setPrefSize(WINDOW_WIDTH * 0.6, WINDOW_HEIGHT * 0.6);
         titleRoot.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
         stage.setMinHeight(300);
@@ -280,10 +291,10 @@ public class MathDoku extends Application {
         titleRoot.add(title, 0, 0, 1, 1);
         titleRoot.add(loadOptionsHBox, 0, 1, 1, 1);
 
-        Scene titleScene = new Scene(titleRoot,WINDOW_WIDTH,WINDOW_HEIGHT);
-        
-        //stage.minWidthProperty().bind(titleScene.heightProperty().multiply(1.5));
-        //stage.minHeightProperty().bind(titleScene.widthProperty().divide(1.5));
+        Scene titleScene = new Scene(titleRoot, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        // stage.minWidthProperty().bind(titleScene.heightProperty().multiply(1.5));
+        // stage.minHeightProperty().bind(titleScene.widthProperty().divide(1.5));
 
         titleScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
 
@@ -296,14 +307,17 @@ public class MathDoku extends Application {
     /**
      * Start method for javaFX that sets up the GUI and begins the game.
      * <p>
-     * Instansiates the GUI with buttons and grid and contains all the method handlers for each button.
-     * I've tried to keep all javaFX components only accessable through this, exceptions include MathDokuCell and MathDokuCanvas.
+     * Instansiates the GUI with buttons and grid and contains all the method
+     * handlers for each button. I've tried to keep all javaFX components only
+     * accessable through this, exceptions include MathDokuCell and MathDokuCanvas.
      * Is called by javaFX once the launch method has been called.
      * 
-     * @param stage A javaFX object that represents the GUI, all javaFX objects must be added to it.
-     * @param list The list of grid cages that should be loaded.
+     * @param stage A javaFX object that represents the GUI, all javaFX objects must
+     *              be added to it.
+     * @param list  The list of grid cages that should be loaded.
      */
     public void startMainGame(Stage stage, List<String> list) {
+        
 
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
@@ -311,7 +325,9 @@ public class MathDoku extends Application {
         root.setVgap(10);
         root.setPadding(new Insets(20, 20, 20, 20));
 
-        //button box
+        Scene scene = new Scene(root,WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        // button box
         VBox buttonVBox = new VBox();
         buttonVBox.setAlignment(Pos.CENTER);
         buttonVBox.setSpacing(10);
@@ -320,7 +336,7 @@ public class MathDoku extends Application {
         HBox undoRedoHBox = new HBox();
         undoButton = new Button("Undo");
         redoButton = new Button("Redo");
-        
+
         undoRedoHBox.getChildren().addAll(undoButton, redoButton);
         undoRedoHBox.setAlignment(Pos.CENTER);
         undoRedoHBox.setSpacing(10);
@@ -342,23 +358,21 @@ public class MathDoku extends Application {
         redoButton.prefHeightProperty().bind(undoRedoHBox.widthProperty());
 
         undoRedoHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
-        //undoRedoHBox.prefHeightProperty().bind(root.prefHeightProperty());
+        // undoRedoHBox.prefHeightProperty().bind(root.prefHeightProperty());
 
         /*
-        undoRedoHBox.heightProperty().addListener((observable, oldValue, newValue) -> {
-            undoButton.prefHeight((double)newValue);
-            redoButton.prefHeight((double)newValue);
-        });
+         * undoRedoHBox.heightProperty().addListener((observable, oldValue, newValue) ->
+         * { undoButton.prefHeight((double)newValue);
+         * redoButton.prefHeight((double)newValue); });
+         * 
+         * undoRedoHBox.widthProperty().addListener((observable, oldValue, newValue) ->
+         * { undoButton.prefWidth((double)newValue);
+         * redoButton.prefWidth((double)newValue); });
+         */
 
-        undoRedoHBox.widthProperty().addListener((observable, oldValue, newValue) -> {
-            undoButton.prefWidth((double)newValue);
-            redoButton.prefWidth((double)newValue);
-        });
-        */
-
-        //undoRedoHBox.prefWidthProperty().bind(root.widthProperty());
+        // undoRedoHBox.prefWidthProperty().bind(root.widthProperty());
         undoRedoHBox.setMinWidth(150);
-        //undoRedoHBox.prefHeightProperty().bind(root.heightProperty());
+        // undoRedoHBox.prefHeightProperty().bind(root.heightProperty());
 
         // clear button
         HBox clearHBox = new HBox();
@@ -373,10 +387,10 @@ public class MathDoku extends Application {
         clearButton.prefHeightProperty().bind(clearHBox.widthProperty());
 
         clearHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
-        //clearHBox.prefHeightProperty().bind(root.prefHeightProperty());
+        // clearHBox.prefHeightProperty().bind(root.prefHeightProperty());
 
-        //clearHBox.prefWidthProperty().bind(root.widthProperty());
-        //clearHBox.prefHeightProperty().bind(root.heightProperty());
+        // clearHBox.prefWidthProperty().bind(root.widthProperty());
+        // clearHBox.prefHeightProperty().bind(root.heightProperty());
 
         /**
          * Checks if the user wants to clear the grid.
@@ -385,8 +399,9 @@ public class MathDoku extends Application {
          */
         class ClearButtonEventHandler implements EventHandler<ActionEvent> {
 
-             /**
-             * Generates a confirmation dialog that asks the user if they want to clear the grid.
+            /**
+             * Generates a confirmation dialog that asks the user if they want to clear the
+             * grid.
              * 
              * @param arg0 An ActionEvent, not actually used for anything.
              */
@@ -398,13 +413,13 @@ public class MathDoku extends Application {
                 alert.setTitle("Clear board");
                 alert.setHeaderText("");
 
-                //set background
+                // set background
                 alert.getDialogPane().getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
                 alert.getDialogPane().setId("confirmationDialog");
-                
+
                 alert.showAndWait().ifPresent(btnType -> {
-                    if (btnType == ButtonType.OK){
-                        //clear all cells
+                    if (btnType == ButtonType.OK) {
+                        // clear all cells
                         mathDokuModel.clearAllCells();
                     }
                 });
@@ -413,9 +428,9 @@ public class MathDoku extends Application {
 
         clearButton.setOnAction(new ClearButtonEventHandler());
 
-        //show mistakes button
+        // show mistakes button
         HBox showMistakesHBox = new HBox();
-        Button showMistakesButton = new Button("Show mistakes");
+        ToggleButton showMistakesButton = new ToggleButton("Show mistakes");
         showMistakesHBox.getChildren().addAll(showMistakesButton);
         showMistakesHBox.setAlignment(Pos.CENTER);
         showMistakesHBox.setSpacing(10);
@@ -425,21 +440,89 @@ public class MathDoku extends Application {
         showMistakesButton.prefWidthProperty().bind(showMistakesHBox.widthProperty());
         showMistakesButton.prefHeightProperty().bind(showMistakesHBox.widthProperty());
 
-        showMistakesButton.setOnAction(e -> mathDokuModel.solve());
+        showMistakesButton.setOnAction(e -> {
+            mathDokuModel.setHighlight(showMistakesButton.isSelected());
+            mathDokuModel.check();
+            mathDokuModel.checkMaths();
+        });
 
-        showMistakesHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
-        //showMistakesHBox.prefHeightProperty().bind(root.prefHeightProperty());
+        // showMistakesHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
 
-        //add button boxes to other box
-        buttonVBox.getChildren().addAll(undoRedoHBox, clearHBox, showMistakesHBox);
+        // solve button
+        HBox solveHBox = new HBox();
+        Button solveButton = new Button("Solve");
+        solveHBox.getChildren().addAll(solveButton);
+        solveHBox.setAlignment(Pos.CENTER);
+        solveHBox.setSpacing(10);
+
+        solveButton.setMaxWidth(140);
+        solveButton.setMaxHeight(70);
+        solveButton.prefWidthProperty().bind(solveHBox.widthProperty());
+        solveButton.prefHeightProperty().bind(solveHBox.widthProperty());
+
+        solveButton.setOnAction(e -> mathDokuModel.solve());
+
+        solveHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+
+        // hint button
+        HBox hintHBox = new HBox();
+        Button hintButton = new Button("Hint");
+        hintHBox.getChildren().addAll(hintButton);
+        hintHBox.setAlignment(Pos.CENTER);
+        hintHBox.setSpacing(10);
+
+        hintButton.setMaxWidth(140);
+        hintButton.setMaxHeight(70);
+        hintButton.prefWidthProperty().bind(hintHBox.widthProperty());
+        hintButton.prefHeightProperty().bind(hintHBox.widthProperty());
+
+        hintButton.setOnAction(e -> mathDokuModel.hint());
+
+        hintHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+
+
+        // textSize buttons
+        HBox textSizeHBox = new HBox();
+        Button smallTextButton = new Button("T");
+        Button midTextButton = new Button("T");
+        Button largeTextButton = new Button("T");
+        textSizeHBox.getChildren().addAll(smallTextButton, midTextButton, largeTextButton);
+        textSizeHBox.setAlignment(Pos.CENTER);
+        textSizeHBox.setSpacing(10);
+
+        smallTextButton.setMaxWidth(70);//45
+        smallTextButton.setMaxHeight(70);
+        smallTextButton.setStyle("-fx-font-size:15");
+        smallTextButton.prefWidthProperty().bind(textSizeHBox.widthProperty());
+        smallTextButton.prefHeightProperty().bind(textSizeHBox.widthProperty());
+
+        midTextButton.setMaxWidth(70);//45
+        midTextButton.setMaxHeight(70);
+        midTextButton.setStyle("-fx-font-size:20");
+        midTextButton.prefWidthProperty().bind(textSizeHBox.widthProperty());
+        midTextButton.prefHeightProperty().bind(textSizeHBox.widthProperty());
+
+        largeTextButton.setMaxWidth(70);//45
+        largeTextButton.setMaxHeight(70);
+        largeTextButton.setStyle("-fx-font-size:25");
+        largeTextButton.prefWidthProperty().bind(textSizeHBox.widthProperty());
+        largeTextButton.prefHeightProperty().bind(textSizeHBox.widthProperty());
+
+        smallTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(15));
+        midTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(20));
+        largeTextButton.setOnAction(e -> mathDokuModel.setCellDimensions(25));
+
+        textSizeHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
+
+        // add button boxes to other box
+        buttonVBox.getChildren().addAll(undoRedoHBox, clearHBox, showMistakesHBox, solveHBox, hintHBox, textSizeHBox);
 
         buttonVBox.prefWidthProperty().bind(root.prefWidthProperty());
         buttonVBox.prefHeightProperty().bind(root.prefHeightProperty());
 
-
-        //buttonVBox.prefWidthProperty().bind(root.widthProperty());
-        //buttonVBox.prefWidth(30);
-        //buttonVBox.prefHeightProperty().bind(root.heightProperty());
+        // buttonVBox.prefWidthProperty().bind(root.widthProperty());
+        // buttonVBox.prefWidth(30);
+        // buttonVBox.prefHeightProperty().bind(root.heightProperty());
 
         /**
          * Lets the user press a button to enter numbers into the grid.
@@ -451,26 +534,28 @@ public class MathDoku extends Application {
             /**
              * Handles the user pressing a number button to enter numbers into the grid.
              * 
-             * @param arg0 An ActionEvent, used to find the number the user wants to enter into the grid.
+             * @param arg0 An ActionEvent, used to find the number the user wants to enter
+             *             into the grid.
              */
             @Override
             public void handle(ActionEvent arg0) {
-                if (mathDokuModel.hasCurrentCell()){
+                if (mathDokuModel.hasCurrentCell()) {
                     EventTarget target = arg0.getTarget();
 
-                    //get the text from the button
-                    if (target instanceof Button){
+                    // get the text from the button
+                    if (target instanceof Button) {
                         Button button = (Button) arg0.getTarget();
                         mathDokuModel.getCurrentCell().updateNumber(button.getText());
-                        
-                        //TODO: check if the show errors button is toggled and pass it in as a parameter
-                        mathDokuModel.check(true);
+
+                        // TODO: check if the show errors button is toggled and pass it in as a
+                        // parameter
+                        mathDokuModel.check();
                     }
                 }
             }
         }
-        
-        //generate number buttons
+
+        // generate number buttons
         VBox numberButtonsVBox = new VBox();
         numberButtonsVBox.setAlignment(Pos.CENTER);
         numberButtonsVBox.setSpacing(10);
@@ -478,7 +563,7 @@ public class MathDoku extends Application {
         numberButtonsVBox.prefWidthProperty().bind(root.prefWidthProperty());
         numberButtonsVBox.prefHeightProperty().bind(root.prefHeightProperty());
 
-        //ensure that only number buttons appear that are valid for the gridDimensions
+        // ensure that only number buttons appear that are valid for the gridDimensions
         for (int i = 1; i < 10 && i <= gridDimensions; i++) {
             Button button = new Button(Integer.toString(i));
             button.setMaxWidth(70);
@@ -488,7 +573,7 @@ public class MathDoku extends Application {
             button.setOnAction(new NumberButtonEventHandler());
             numberButtonsVBox.getChildren().add(button);
         }
-        if (gridDimensions > 9){
+        if (gridDimensions > 9) {
             Button button = new Button("0");
             button.setMaxWidth(70);
             button.setMaxHeight(70);
@@ -504,32 +589,37 @@ public class MathDoku extends Application {
         grid.setVgap(0);
         grid.setPadding(new Insets(10, 10, 10, 10));
 
-        //Generates the grid of MathDokuCells.
-        //Adds each cell to a matrix in mathDokuModel.
+        // Generates the grid of MathDokuCells.
+        // Adds each cell to a matrix in mathDokuModel.
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
                 MathDokuCell cell = new MathDokuCell(mathDokuModel);
+                
+                cell.winProperty().addListener((observable, oldValue, newValue) -> {
+                    if(newValue){
+                        scene.getRoot().setId("victoryRoyale");
+                    }
+                });
 
                 grid.add(cell, i, j, 1, 1);
                 mathDokuModel.addCell(cell, i, j);
 
-                //Bind canvas size to stack pane size.
+                // Bind canvas size to stack pane size.
                 grid.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
-                    cell.setRealWidth((double)newValue/(grid.getColumnCount()+2));
+                    cell.setRealWidth((double) newValue / (grid.getColumnCount() + 2));
                 });
-        
+
                 grid.prefHeightProperty().addListener((observable, oldValue, newValue) -> {
-                    cell.setRealHeight((double)newValue/(grid.getRowCount()+2));
+                    cell.setRealHeight((double) newValue / (grid.getRowCount() + 2));
                 });
             }
         }
 
-        //Bind grid size to parent grid size.
+        // Bind grid size to parent grid size.
         grid.prefWidthProperty().bind(root.prefWidthProperty());
         grid.prefHeightProperty().bind(root.prefHeightProperty());
-        
 
-        //TODO: allow the user to use arow keys to switch cells (longterm)
+        // TODO: allow the user to use arow keys to switch cells (longterm)
         /**
          * Lets the user press keys to enter and remove numbers in the grid.
          * 
@@ -540,21 +630,22 @@ public class MathDoku extends Application {
             /**
              * Handles the user press a key to enter numbers into the grid.
              * 
-             * @param arg0 An KeyEvent, used to find the number/command the user wants to enter into the grid.
+             * @param arg0 An KeyEvent, used to find the number/command the user wants to
+             *             enter into the grid.
              */
             @Override
             public void handle(KeyEvent arg0) {
-                if (mathDokuModel.hasCurrentCell()){
-                    //check if they want to delete or enter a number
+                if (mathDokuModel.hasCurrentCell()) {
+                    // check if they want to delete or enter a number
                     if (arg0.getCode() == KeyCode.BACK_SPACE) {
                         mathDokuModel.getCurrentCell().updateNumber("delete");
                     } else {
                         try {
-                            //Make sure it is an integer
+                            // Make sure it is an integer
                             Integer.parseInt(arg0.getText());
                             mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
                         } catch (NumberFormatException e) {
-                            //Someone tried to type something that isn't a number or delete, ignore it
+                            // Someone tried to type something that isn't a number or delete, ignore it
                         }
                     }
                 }
@@ -593,7 +684,7 @@ public class MathDoku extends Application {
             mathDokuModel.generateFromList(list);
         }
 
-        Scene scene = new Scene(root,WINDOW_WIDTH, WINDOW_HEIGHT);
+        
         
         stage.setMinHeight(MINIMUM_MAIN_WINDOW_HEIGHT);
         stage.setMinWidth(MINIMUM_MAIN_WINDOW_WIDTH);
@@ -604,19 +695,20 @@ public class MathDoku extends Application {
 
         //root.setGridLinesVisible(true);
         
+        /*
         root.widthProperty().addListener(e -> {
             System.out.println("1 " + buttonVBox.widthProperty());
             System.out.println("2 " + buttonVBox.prefWidthProperty());
             System.out.println("3 " + numberButtonsVBox.widthProperty());
             System.out.println("4 " + numberButtonsVBox.prefWidthProperty());
         });
-        
+        */
 
         scene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+        //scene.getRoot().setId("confetti");
         
         stage.setScene(scene);
         stage.setTitle("MathDoku");
-
 
         stage.show();
     }
