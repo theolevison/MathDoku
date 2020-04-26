@@ -34,7 +34,7 @@ public class PossibleSolutionList{
     public boolean remove(Integer number, Integer priorityInt) {
         //if (priorityInt <= priority[number-1]){
             numberEnabled[number-1] = false;
-            //priority[number-1] = priorityInt;
+            priority[number-1] = priorityInt;
             return true;
         /*} else {
             return false;

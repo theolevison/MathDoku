@@ -796,7 +796,7 @@ public class MathDokuModel {
                     // TODO: decide if I should bother updating this
                     // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
-                    //cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
                 }
             }
             System.out.println("Puzzle has been solved");
@@ -806,6 +806,7 @@ public class MathDokuModel {
     private boolean solveRecursively(int i, int j) {
         MathDokuCell cell = grid[i][j];
 
+        
         if (i == 0 && j == 0 && cell.getPossibleSolutionList().isEmpty()){
             System.out.println("Failed miserably");
         }
@@ -817,12 +818,14 @@ public class MathDokuModel {
             // try the first option from the set.
             // set should never be empty at this point fingers crossed.
 
+            
             if (cell.getPossibleSolutionList().isEmpty()) {
-                // options exhausted here so the error is higher up.
+                // options exhausted before this cell could do anything, so the error is higher up.
 
-                System.out.println("Disappointed parent and exhausted, go back once.");
+                System.out.println("Child has no prospects, go back once.");
                 return false;
             }
+            
 
             cell.setPossibleSolutionNumber(cell.getPossibleSolutionList().get());
         }
@@ -831,14 +834,15 @@ public class MathDokuModel {
 
         //eliminate that number from other cell's possibility sets in the same row/column.
         //No arguments with parents, only try to delete from cells in front and below.
+        
         for (int k = 0; k < gridDimensions; k++) {
             if (k > j){
                 //column.
-                grid[i][k].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j);
+                grid[i][k].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
             }
             if (k > i){
                 //row.
-                grid[k][j].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j);
+                grid[k][j].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
             }
         }
 
@@ -853,33 +857,42 @@ public class MathDokuModel {
                 success = solveRecursively(0, j+1);
             } else {
                 //i = 5 and j =5
+                //to get to this point all sodoku rules should have been followed
                 success = checkSolutions();// && checkMathsSolutions();
             }
             /*
         }
         */
 
-        if (!success && !cell.getPossibleSolutionList().isEmpty()){
+        if (!success && cell.getFinalSolutionNumber() != 0){
+            //has only one possible value so error is before this
+            //this shouldnt have changed any values because that has already been done at the beginning
+
+            return false;
+
+        } else if (!success && !cell.getPossibleSolutionList().isEmpty()){
             //error but more options available so remove this attempt and try those.
 
             System.out.println("Disappointed parent, try to make more children.");
             //try to restore unused option to other cells in the same row/column.
 
+            
             //No sex with parents, only restore cells in front and below.
             for (int k = 0; k < gridDimensions; k++) {
                 if (k > j){
                     //column.
-                    grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j);
+                    grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
                     //grid[i][k].setPossibleSolutionNumber(0);
                 }
                 if (k > i){
                     //row.
-                    grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j);
+                    grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
                     //grid[k][j].setPossibleSolutionNumber(0);
                 }
             }
+            
 
-            cell.getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j);
+            cell.getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
 
             return solveRecursively(i, j);
 
@@ -888,6 +901,21 @@ public class MathDokuModel {
         else if (!success && cell.getPossibleSolutionList().isEmpty()) {
             //options exhausted here so the error is higher up.
             System.out.println("\n\n\nDisappointed parent and exhausted, go back once.\n\n\n");
+
+            //restore the last value used
+            for (int k = 0; k < gridDimensions; k++) {
+                if (k > j){
+                    //column.
+                    grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[i][k].setPossibleSolutionNumber(0);
+                }
+                if (k > i){
+                    //row.
+                    grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[k][j].setPossibleSolutionNumber(0);
+                }
+            }
+
             return false;
         }
 
