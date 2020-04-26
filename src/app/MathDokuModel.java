@@ -281,12 +281,13 @@ public class MathDokuModel {
             mathDokuCage.fillSingleCages(gridDimensions);
         }
 
-        generateGeneralSodoku();
+        //generateGeneralSodoku();
+        solve();
 
-        /*
-         * //now calculate maths targets for (MathDokuCage mathDokuCage : cages) {
-         * mathDokuCage.fillBigCages(gridDimensions); }
-         */
+        //now calculate maths targets
+        for (MathDokuCage mathDokuCage : cages) {
+            mathDokuCage.fillBigCages(gridDimensions);
+        }
 
         drawCages();
     }
@@ -312,6 +313,9 @@ public class MathDokuModel {
             return;
         }
 
+        solve();
+
+        /*
         // DO NOT CHANGE SINGLE CAGES!!!
         Set<MathDokuCell> singleCells = new HashSet<MathDokuCell>();
         for (MathDokuCage mathDokuCage : cages) {
@@ -347,6 +351,7 @@ public class MathDokuModel {
             }
             // TODO: get rid of this or make it !checkSolutions()
         } while (checkSolutions());
+        */
 
         // have to do this to reset after using checkSolutions()
         for (int i = 0; i < gridDimensions; i++) {
@@ -791,7 +796,7 @@ public class MathDokuModel {
                     // TODO: decide if I should bother updating this
                     // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
-                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                    //cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
                 }
             }
             System.out.println("Puzzle has been solved");
@@ -838,6 +843,7 @@ public class MathDokuModel {
         }
 
         boolean success = false;
+        
         /*
         if (checkMathsSolutions()){
             */

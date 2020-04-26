@@ -268,6 +268,7 @@ public class MathDoku extends Application {
         loadTextButton.setOnAction(new LoadTextEventHandler());
 
         autoGenerateButton.setOnAction(e -> {
+            //TODO: let the user choose this with a slider or something.
             gridDimensions = 3;
             mathDokuModel.setCellDimensions(0.07);
             mathDokuModel.setGridDimensions(gridDimensions);
@@ -678,9 +679,9 @@ public class MathDoku extends Application {
         if (list.isEmpty()){
             //generate random
             //mathDokuModel.generateDefault2Grid();
-            mathDokuModel.generateDefault3Grid();
+            //mathDokuModel.generateDefault3Grid();
             //mathDokuModel.generateDefault6Grid();
-            //mathDokuModel.generateNewGrid();
+            mathDokuModel.generateNewGrid();
         } else {
             mathDokuModel.generateFromList(list);
         }

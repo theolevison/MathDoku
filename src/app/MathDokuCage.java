@@ -64,7 +64,10 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
     public boolean checkMaths(boolean highlight){
         try {
             float sum;
-            if (sign.equals("+")){
+            if (sign.equals("")){
+                //single cage
+                sum = Integer.parseInt(get(0).getNumber());
+            } else if (sign.equals("+")){
                 sum = 0;
                 for (MathDokuCell mathDokuCell : this){
                     sum += Integer.parseInt(mathDokuCell.getNumber());
@@ -130,7 +133,10 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
         }
         
         float sum;
-        if (sign.equals("+")){
+        if (sign.equals("")){
+            //single cage
+            sum = get(0).getPossibleSolutionNumber();
+        } else if (sign.equals("+")){
             sum = 0;
             for (MathDokuCell mathDokuCell : this){
                 sum += mathDokuCell.getPossibleSolutionNumber();
@@ -183,11 +189,12 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             int num;
             do {
                 num = rand.nextInt(gridDimensions);
-                get(0).setFinalSolutionNumber(num);
-                //add number with highest priority
-                get(0).getPossibleSolutionList().setAbsoluteNumber(num);
-                targetNumber = num;
             } while (num == 0);
+            get(0).setFinalSolutionNumber(num);
+            //add number with highest priority
+            get(0).getPossibleSolutionList().setAbsoluteNumber(num);
+            targetNumber = num;
+            sign = "";
         }
     }
 
@@ -205,6 +212,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
 
             //check all division rules work before allowing division as an option.
             int divisionQuotient = 1;
+            sign = "error";
 
             //check if the numbers can divide each other without leaving remainders.
             for (int i = 0; i < size(); i++) {
@@ -213,11 +221,20 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     int y = get(j).getFinalSolutionNumber();
                     //check if the remainder is zero and that the number is not the same.
                     //TODO: check all division combinations
-                    if ((x%y)%divisionQuotient == 0 && x/y != 1){
-                        //pair is divisible, save to test with the next value and skip the for loop.
-                        divisionQuotient = (x/y)/divisionQuotient;
-                        break;
+
+                    try {
+                        if ((x%y)%divisionQuotient == 0 && x/y != 1 && x/y != 0){
+                            //pair is divisible, save to test with the next value and skip the for loop.
+                            divisionQuotient = (x/y)/divisionQuotient;
+                            break;
+                        }
+                    } catch (ArithmeticException e) {
+                        System.out.println(x);
+                        System.out.println(y);
+                        System.out.println(divisionQuotient);
                     }
+
+                    
                 }
             }
 
