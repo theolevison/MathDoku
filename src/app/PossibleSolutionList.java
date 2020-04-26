@@ -3,8 +3,10 @@ package app;
 public class PossibleSolutionList{
     private Boolean[] numberEnabled;
     private Integer[] priority;
+    private int gridDimensions;
 
     public PossibleSolutionList(Integer gridDimensions){
+        this.gridDimensions = gridDimensions;
         priority = new Integer[gridDimensions];
         numberEnabled = new Boolean[gridDimensions];
         for (int i = 0; i < gridDimensions; i++) {
@@ -58,5 +60,12 @@ public class PossibleSolutionList{
             }
         }
         return true;
+    }
+
+    public void reset() {
+        for (int i = 0; i < gridDimensions; i++) {
+            numberEnabled[i] = true;
+            priority[i] = gridDimensions*gridDimensions+1;
+        }
     }
 }

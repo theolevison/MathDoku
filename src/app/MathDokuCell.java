@@ -198,7 +198,6 @@ public class MathDokuCell extends StackPane{
      * @param newNumber The number the user wants to enter into this cell.
      */
     private void setNumber(String newNumber){
-        mathDokuModel.pushToUndoStack(this);
         undoStack.push(number);
         
         number = newNumber;

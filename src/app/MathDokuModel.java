@@ -273,6 +273,20 @@ public class MathDokuModel {
      */
     public void generateNewGrid() {
 
+        // In the unlikely event that there are two single cells with the same number,
+        // start the grid generation process over again
+        System.out.println("\nnew attempt\n");
+        cages.clear();
+
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                MathDokuCell cell = grid[i][j];
+                cell.setPossibleSolutionNumber(0);
+                cell.setFinalSolutionNumber(0);
+                cell.getPossibleSolutionList().reset();
+            }
+        }
+
         generateCages();
         // decide solution first before drawing and setting target numbers
         // fill single cages to make layout more random and not symmetrical
@@ -280,9 +294,26 @@ public class MathDokuModel {
         for (MathDokuCage mathDokuCage : cages) {
             mathDokuCage.fillSingleCages(gridDimensions);
         }
+        
+        //!checkSolutions()
+        // have to do this to reset highlighting etc after using checkSolutions()
+        /*
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                MathDokuCell cell = grid[i][j];
+                cell.setRowConflict(false);
+                cell.setColumnConflict(false);
+            }
+        }
+        */
+        //check();
 
         //generateGeneralSodoku();
-        solve();
+        if (!solve()){
+            generateNewGrid();
+            return;
+        }
+        
 
         //now calculate maths targets
         for (MathDokuCage mathDokuCage : cages) {
@@ -305,8 +336,7 @@ public class MathDokuModel {
         // coupling
         // just basically copy the code again :(
 
-        // In the unlikely event that there are two single cells with the same number,
-        // start the grid generation process over again
+        
 
         if (checkSolutions()) {
             generateNewGrid();
@@ -705,9 +735,9 @@ public class MathDokuModel {
             noColumnConflict = true;
             noRowConflict = true;
             for (int j = 0; j < gridDimensions; j++) {
-
+                //ignore cells without a solution
+                if (grid[i][j].getPossibleSolutionNumber() != 0){
                 // attempt to add number to columnSet, check if there is a conflict.
-                try {
                     if (!columnSet.add(grid[i][j].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[i][k].setColumnConflict(true);
@@ -721,12 +751,8 @@ public class MathDokuModel {
                             grid[i][k].setColumnConflict(false);
                         }
                     }
-                } catch (NumberFormatException e) {
-                    // Not all cells filled in so error thrown and caught.
-                }
 
                 // attempt to add number to rowSet, check if there is a conflict.
-                try {
                     if (!rowSet.add(grid[j][i].getPossibleSolutionNumber())) {
                         for (int k = 0; k < gridDimensions; k++) {
                             grid[k][i].setRowConflict(true);
@@ -740,8 +766,6 @@ public class MathDokuModel {
                             grid[k][i].setRowConflict(false);
                         }
                     }
-                } catch (NumberFormatException e) {
-                    // Not all cells filled in so error thrown and caught.
                 }
             }
         }
@@ -749,21 +773,25 @@ public class MathDokuModel {
     }
 
     public void hint() {
+        int hintCount = 0;
         Random rand = new Random();
         
         MathDokuCell cell;
         //ensure cell has not been filled in yet.
         do {
             cell = grid[rand.nextInt(gridDimensions)][rand.nextInt(gridDimensions)];
-        } while (cell.getNumber() != "");
+            hintCount++;
+        } while (cell.getNumber() != "" && hintCount <= gridDimensions*gridDimensions);
 
         System.out.println("hinted");
+        hintCount++;
 
         //randomly reveal a cell's solution.
+        pushToUndoStack(cell);
         cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
     }
 
-    public void solve() {
+    public boolean solve() {
         // check for single cells.
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -796,10 +824,14 @@ public class MathDokuModel {
                     // TODO: decide if I should bother updating this
                     // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
-                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                    //TODO: enable below if not generating game with this
+                    //cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
                 }
             }
             System.out.println("Puzzle has been solved");
+            return true;
+        } else {
+            return false;
         }
     }
 

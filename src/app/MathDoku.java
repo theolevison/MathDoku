@@ -269,7 +269,7 @@ public class MathDoku extends Application {
 
         autoGenerateButton.setOnAction(e -> {
             //TODO: let the user choose this with a slider or something.
-            gridDimensions = 3;
+            gridDimensions = 6;
             mathDokuModel.setCellDimensions(0.07);
             mathDokuModel.setGridDimensions(gridDimensions);
             startMainGame(stage, new ArrayList<String>());

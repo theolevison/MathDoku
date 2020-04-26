@@ -232,9 +232,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                         System.out.println(x);
                         System.out.println(y);
                         System.out.println(divisionQuotient);
-                    }
-
-                    
+                    }                    
                 }
             }
 
@@ -263,8 +261,18 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                 //more complicated.
                 //TODO: finish this.
                 else if (signNum == 1){
+
+                    ArrayList<Integer> list = new ArrayList<Integer>();
+                    //sort low to high first (for this can be any order). Does prevent negative targets.
+                    for (MathDokuCell mathDokuCell : this){
+                        list.add(mathDokuCell.getFinalSolutionNumber());
+                    }
+                    list.sort(null); //low to high.
+                    //then check subtraction.
+                    for (Integer integer : list) {
+                        targetNumber = integer-targetNumber;
+                    }
                     
-                    targetNumber = 0;
                     sign = "-";
                     break;
                 } else if (signNum == 2){
