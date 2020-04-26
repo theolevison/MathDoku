@@ -16,7 +16,8 @@ public class PossibleSolutionList{
     public boolean add(Integer number, Integer priorityInt) {
         if (priorityInt <= priority[number-1]){
             numberEnabled[number-1] = true;
-            priority[number-1] = priorityInt;
+            //TODO: without the below the priority system doesnt actually work ssoooooo
+            //priority[number-1] = priorityInt;
             return true;
         } else {
             return false;
