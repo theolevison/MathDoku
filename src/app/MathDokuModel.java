@@ -309,7 +309,7 @@ public class MathDokuModel {
         //check();
 
         //generateGeneralSodoku();
-        if (!solve()){
+        if (!solve(false)){
             generateNewGrid();
             return;
         }
@@ -321,78 +321,6 @@ public class MathDokuModel {
         }
 
         drawCages();
-    }
-
-    /**
-     * Generate a sodoku solution.
-     */
-    private void generateGeneralSodoku() {
-        // generate solution numbers based on normal sudoku rules, taking into account
-        // the single cell targets
-        // so that check works with solution numbers, we have to setNumber() instead of
-        // setSolutionNumber()
-        // remember to switch at the end before the grid is rendered
-        // never mind I see no easy way to do that without loads of faff and weird
-        // coupling
-        // just basically copy the code again :(
-
-        
-
-        if (checkSolutions()) {
-            generateNewGrid();
-            return;
-        }
-
-        solve();
-
-        /*
-        // DO NOT CHANGE SINGLE CAGES!!!
-        Set<MathDokuCell> singleCells = new HashSet<MathDokuCell>();
-        for (MathDokuCage mathDokuCage : cages) {
-            if (cages.size() == 1) {
-                singleCells.addAll(mathDokuCage);
-            }
-        }
-
-        // TODO: decide if the outer do-while is necessary
-        // TODO: I think this could be improved with sets for rows and columns, then you
-        // wouldnt have to try out values that have already been entered
-        do {
-            System.out.println("hiii");
-            // try out solutions until no errors are found
-            for (int i = 0; i < gridDimensions; i++) {
-                for (int j = 0; j < gridDimensions; j++) {
-                    MathDokuCell cell = grid[i][j];
-
-                    // DO NOT CHANGE SINGLE CAGES!!!
-                    if (!singleCells.contains(cell)) {
-                        for (int k = 1; k <= gridDimensions; k++) {
-                            // try out a number
-                            cell.setFinalSolutionNumber(k);
-                            // then check it hasnt broken any rules
-                            if (checkSolutions()) {
-                                System.out.println(k);
-                                // System.out.println(count);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            // TODO: get rid of this or make it !checkSolutions()
-        } while (checkSolutions());
-        */
-
-        // have to do this to reset after using checkSolutions()
-        for (int i = 0; i < gridDimensions; i++) {
-            for (int j = 0; j < gridDimensions; j++) {
-                MathDokuCell cell = grid[i][j];
-                cell.setRowConflict(false);
-                cell.setColumnConflict(false);
-            }
-        }
-        check();
-
     }
 
     /**
@@ -788,7 +716,7 @@ public class MathDokuModel {
         cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
     }
 
-    public boolean solve() {
+    public boolean solve(boolean fill) {
         // check for single cells.
         for (int i = 0; i < gridDimensions; i++) {
             for (int j = 0; j < gridDimensions; j++) {
@@ -822,6 +750,9 @@ public class MathDokuModel {
                     // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
                     //TODO: enable below if not generating game with this
+                    if (fill){
+                        cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                    }
                     //cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
                 }
             }

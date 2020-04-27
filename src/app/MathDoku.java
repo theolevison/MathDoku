@@ -482,7 +482,7 @@ public class MathDoku extends Application {
         solveButton.prefWidthProperty().bind(solveHBox.widthProperty());
         solveButton.prefHeightProperty().bind(solveHBox.widthProperty());
 
-        solveButton.setOnAction(e -> mathDokuModel.solve());
+        solveButton.setOnAction(e -> mathDokuModel.solve(true));
 
         solveHBox.prefWidthProperty().bind(buttonVBox.prefWidthProperty());
 
