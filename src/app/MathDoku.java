@@ -106,6 +106,26 @@ public class MathDoku extends Application {
         loadOptionsHBox.setMaxHeight(100);
         loadOptionsHBox.setMaxWidth(WINDOW_WIDTH);
 
+
+        // grid slider
+        HBox sliderHBox = new HBox();
+        Slider slider = new Slider(0, 10, 6);
+        slider.setMaxHeight(Double.MAX_VALUE);
+        slider.setMaxHeight(Double.MAX_VALUE);
+        sliderHBox.getChildren().addAll(slider);
+        sliderHBox.setAlignment(Pos.CENTER);
+        sliderHBox.setSpacing(10);
+        slider.setShowTickLabels(true);
+        slider.setShowTickMarks(true);
+        slider.setMajorTickUnit(1); 
+        slider.setBlockIncrement(1); 
+        slider.setMinorTickCount(0);
+        slider.setSnapToTicks(true);
+  
+
+        sliderHBox.setMaxHeight(100);
+        sliderHBox.setMaxWidth(WINDOW_WIDTH);
+
         // loadOptionsHBox.setPrefSize(window_width, window_height);
         // loadOptionsHBox.setMaxSize(Region.USE_COMPUTED_SIZE,
         // Region.USE_COMPUTED_SIZE);
@@ -269,7 +289,7 @@ public class MathDoku extends Application {
 
         autoGenerateButton.setOnAction(e -> {
             //TODO: let the user choose this with a slider or something.
-            gridDimensions = 6;
+            gridDimensions = (int)slider.getValue();
             mathDokuModel.setCellDimensions(0.07);
             mathDokuModel.setGridDimensions(gridDimensions);
             startMainGame(stage, new ArrayList<String>());
@@ -291,6 +311,7 @@ public class MathDoku extends Application {
 
         titleRoot.add(title, 0, 0, 1, 1);
         titleRoot.add(loadOptionsHBox, 0, 1, 1, 1);
+        titleRoot.add(sliderHBox, 0, 2, 1, 1);
 
         Scene titleScene = new Scene(titleRoot, WINDOW_WIDTH, WINDOW_HEIGHT);
 
