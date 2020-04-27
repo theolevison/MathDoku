@@ -783,9 +783,6 @@ public class MathDokuModel {
             hintCount++;
         } while (cell.getNumber() != "" && hintCount <= gridDimensions*gridDimensions);
 
-        System.out.println("hinted");
-        hintCount++;
-
         //randomly reveal a cell's solution.
         pushToUndoStack(cell);
         cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));

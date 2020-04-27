@@ -144,7 +144,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
         } else if (sign.equals("-")){
             sum = 0;
             ArrayList<Integer> list = new ArrayList<Integer>();
-            //sort low to high first (for this can be any order). Does prevent negative targets.
+            //sort low to high first (for this can be any order). Does not prevent negative targets.
             for (MathDokuCell mathDokuCell : this){
                 list.add(mathDokuCell.getPossibleSolutionNumber());
             }
@@ -214,6 +214,25 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
             int divisionQuotient = 1;
             sign = "error";
 
+            //Took the easy way out and ill just sort them and lose a bunch of possibilites
+            ArrayList<Integer> divList = new ArrayList<Integer>();
+            //sort low to high first (for this can be any order). Does prevent negative targets.
+            for (MathDokuCell mathDokuCell : this){
+                divList.add(mathDokuCell.getFinalSolutionNumber());
+            }
+            divList.sort(null); //low to high.
+            //then check subtraction.
+            for (Integer integer : divList) {
+                if (integer%divisionQuotient == 0){
+                    divisionQuotient = integer/divisionQuotient;
+                } else {
+                    divisionQuotient = 1;
+                    break;
+                }
+            }
+
+
+            /*
             //check if the numbers can divide each other without leaving remainders.
             for (int i = 0; i < size(); i++) {
                 for (int j = 0; j < size(); j++) {
@@ -223,9 +242,9 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     //TODO: check all division combinations
 
                     try {
-                        if ((x%y)%divisionQuotient == 0 && x/y != 1 && x/y != 0){
+                        if (x%y == 0 && (x%y)%divisionQuotient == 0){
                             //pair is divisible, save to test with the next value and skip the for loop.
-                            divisionQuotient = (x/y)/divisionQuotient;
+                            divisionQuotient = x/y/divisionQuotient;
                             break;
                         }
                     } catch (ArithmeticException e) {
@@ -235,6 +254,7 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     }                    
                 }
             }
+            */
 
             //check that the divisonQuotient has actually changed.
             if (divisionQuotient != 1){
@@ -257,13 +277,10 @@ public class MathDokuCage extends ArrayList<MathDokuCell>{
                     targetNumber = sum;
                     sign = "+";
                     break;
-                }
-                //more complicated.
-                //TODO: finish this.
-                else if (signNum == 1){
+                } else if (signNum == 1){
 
                     ArrayList<Integer> list = new ArrayList<Integer>();
-                    //sort low to high first (for this can be any order). Does prevent negative targets.
+                    //sort low to high first (for this can be any order). Does not prevent negative targets.
                     for (MathDokuCell mathDokuCell : this){
                         list.add(mathDokuCell.getFinalSolutionNumber());
                     }
