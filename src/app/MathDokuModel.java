@@ -952,4 +952,202 @@ public class MathDokuModel {
         System.out.println("Proud parent: go up");
         return true;
     }
+
+
+
+
+
+
+    /**
+     * 
+     * A solver that doesn't work yay!!!!
+     * 
+     * 
+     * 
+     */
+
+    public boolean shitSolve() {
+        // check for single cells.
+        for (int i = 0; i < gridDimensions; i++) {
+            for (int j = 0; j < gridDimensions; j++) {
+                if (grid[i][j].getFinalSolutionNumber() != 0) {
+                    System.out.println("found a single");
+                    // eliminate that number from other cell's possibility sets in the same
+                    // row/column.
+                    for (int k = 0; k < gridDimensions; k++) {
+                        if (k != j){
+                            //column.
+                            grid[i][k].getPossibleSolutionList().remove(grid[i][j].getFinalSolutionNumber(), 0);
+                        }
+                        if (k != i){
+                            //row.
+                            grid[k][j].getPossibleSolutionList().remove(grid[i][j].getFinalSolutionNumber(), 0);
+                        }
+                    }
+                }
+            }
+        }
+
+        // now start recursively finding a solution.
+        // start in top left.
+        if (shitSolveRecursively(0, 0)) {
+            // solution has been found
+
+            for (int i = 0; i < gridDimensions; i++) {
+                for (int j = 0; j < gridDimensions; j++) {
+                    MathDokuCell cell = grid[i][j];
+                    // TODO: decide if I should bother updating this
+                    // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
+                    cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
+                    //TODO: enable below if not generating game with this
+                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                }
+            }
+            System.out.println("Puzzle has been solved");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean shitSolveRecursively(int i, int j) {
+        MathDokuCell cell = grid[i][j];
+
+        
+        if (i == 0 && j == 0 && cell.getPossibleSolutionList().isEmpty()){
+            System.out.println("Failed miserably");
+        }
+
+        // if solution is known, use that.
+        if (cell.getFinalSolutionNumber() != 0) {
+            cell.setPossibleSolutionNumber(cell.getFinalSolutionNumber());
+        } else {
+            // try the first option from the set.
+            // set should never be empty at this point fingers crossed.
+
+            
+            if (cell.getPossibleSolutionList().isEmpty()) {
+                // options exhausted before this cell could do anything, so the error is higher up.
+
+                System.out.println("Child has no prospects, go back once.");
+                cell.setPossibleSolutionNumber(0);
+                return false;
+            }
+            
+
+            cell.setPossibleSolutionNumber(cell.getPossibleSolutionList().get());
+        }
+        //cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
+
+
+        //eliminate that number from other cell's possibility sets in the same row/column.
+        //No arguments with parents, only try to delete from cells in front and below.
+        
+        for (int k = 0; k < gridDimensions; k++) {
+            if (k > j){
+                //column.
+                grid[i][k].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+            }
+            if (k > i){
+                //row.
+                grid[k][j].getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+            }
+        }
+
+        boolean success = false;
+        
+        
+        if (checkMathsSolutions()){
+            if (i < gridDimensions - 1){
+                success = solveRecursively(i+1, j);
+            } else if (j < gridDimensions - 1){
+                success = solveRecursively(0, j+1);
+            } else {
+                //i = 5 and j =5
+                //to get to this point all sodoku rules should have been followed
+                success = checkSolutions();// && checkMathsSolutions();
+            }
+            
+        }
+        
+
+        if (!success && cell.getFinalSolutionNumber() != 0){
+            //has only one possible value so error is before this
+            //this shouldnt have changed any values because that has already been done at the beginning
+            cell.setPossibleSolutionNumber(0);
+            return false;
+
+        } else if (!success && !cell.getPossibleSolutionList().isEmpty()){
+            //error but more options available so remove this attempt and try those.
+
+            System.out.println("Disappointed parent, try to make more children.");
+            //try to restore unused option to other cells in the same row/column.
+
+            //TODO: restore child if they are below and before you
+            //No sex with parents, only restore cells in front and below.
+            for (int k = 0; k < gridDimensions; k++) {
+                if (k > j){
+                    //column.
+                    //grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //restore the childrens values as much as you can.
+                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
+                        grid[i][k].getPossibleSolutionList().add(k2, i+j*gridDimensions);
+                    }
+                }
+                if (k > i){
+                    //row.
+                    //grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //restore the childrens values as much as you can.
+                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
+                        grid[k][j].getPossibleSolutionList().add(k2, i+j*gridDimensions);
+                    }
+                }
+            }
+            
+
+            cell.getPossibleSolutionList().remove((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+
+            return solveRecursively(i, j);
+
+        }
+        //TODO: remove this bit after I get maths checking working, I think it's redundant but I want to be sure.
+        else if (!success && cell.getPossibleSolutionList().isEmpty()) {
+            //options exhausted here so the error is higher up.
+            System.out.println("\n\n\nDisappointed parent and exhausted, go back once.\n\n\n");
+
+            //restore the last value used
+            for (int k = 0; k < gridDimensions; k++) {
+                if (k > j){
+                    //column.
+                    //grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //restore the childrens values as much as you can.
+                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
+                        grid[i][k].getPossibleSolutionList().add(k2, i+j*gridDimensions);
+                    }
+                }
+                if (k > i){
+                    //row.
+                    //grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //restore the childrens values as much as you can.
+                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
+                        grid[k][j].getPossibleSolutionList().add(k2, i+j*gridDimensions);
+                    }
+                }
+                //restore your own values as much as you can.
+                cell.getPossibleSolutionList().add(k, i+j*gridDimensions);
+            }
+
+            cell.setPossibleSolutionNumber(0);
+            
+
+            return false;
+        }
+
+        //this branch was successful, but the overall attempt may not be, so go up.
+        System.out.println("Proud parent: go up");
+        return true;
+    }
+
+
+
 }
