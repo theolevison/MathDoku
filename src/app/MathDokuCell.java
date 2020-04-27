@@ -199,6 +199,7 @@ public class MathDokuCell extends StackPane{
      */
     private void setNumber(String newNumber){
         undoStack.push(number);
+        //mathDokuModel.pushToUndoStack(this);
         
         number = newNumber;
         mainNumber.setText(newNumber);
@@ -339,7 +340,7 @@ public class MathDokuCell extends StackPane{
      * 
      * @param input The input from the user, either a number or a request to delete.
      */
-    public void updateNumber(String input) {
+    public void updateNumber(String input, boolean user) {
 
         //If delete, delete the last number in the cell
         //TODO: can I make this more elegant?
@@ -351,6 +352,9 @@ public class MathDokuCell extends StackPane{
                     concat += numberArray[i];
                 }
                 //mainNumber.setText(concat);
+                if (user){
+                    mathDokuModel.pushToUndoStack(this);
+                }
                 setNumber(concat);
                 return;
             }
@@ -368,6 +372,9 @@ public class MathDokuCell extends StackPane{
             if (intNumber != 0 || mathDokuModel.getGridDimensions() > 9){
                 if (Integer.parseInt(newNumber) <= mathDokuModel.getGridDimensions()){
                     //mainNumber.setText(newNumber);
+                    if (user){
+                        mathDokuModel.pushToUndoStack(this);
+                    }
                     setNumber(newNumber);
                 }
             }

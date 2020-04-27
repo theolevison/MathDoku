@@ -190,6 +190,7 @@ public class MathDokuModel {
         }
 
         drawCages();
+        solve(false);
     }
 
     /**
@@ -713,7 +714,7 @@ public class MathDokuModel {
 
         //randomly reveal a cell's solution.
         pushToUndoStack(cell);
-        cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()));
+        cell.updateNumber(String.valueOf(cell.getPossibleSolutionNumber()), false);
     }
 
     public boolean solve(boolean fill) {
@@ -751,7 +752,7 @@ public class MathDokuModel {
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
                     //TODO: enable below if not generating game with this
                     if (fill){
-                        cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                        cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()), false);
                     }
                     //cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
                 }
@@ -931,7 +932,7 @@ public class MathDokuModel {
                     // cell.setAbsoluteSolutionList(cell.getPossibleSolutionList());
                     cell.setFinalSolutionNumber(cell.getPossibleSolutionNumber());
                     //TODO: enable below if not generating game with this
-                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()));
+                    cell.updateNumber(Integer.toString(cell.getFinalSolutionNumber()), false);
                 }
             }
             System.out.println("Puzzle has been solved");

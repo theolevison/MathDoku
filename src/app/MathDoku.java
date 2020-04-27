@@ -568,7 +568,7 @@ public class MathDoku extends Application {
                     // get the text from the button
                     if (target instanceof Button) {
                         Button button = (Button) arg0.getTarget();
-                        mathDokuModel.getCurrentCell().updateNumber(button.getText());
+                        mathDokuModel.getCurrentCell().updateNumber(button.getText(), true);
 
                         // TODO: check if the show errors button is toggled and pass it in as a
                         // parameter
@@ -661,12 +661,12 @@ public class MathDoku extends Application {
                 if (mathDokuModel.hasCurrentCell()) {
                     // check if they want to delete or enter a number
                     if (arg0.getCode() == KeyCode.BACK_SPACE) {
-                        mathDokuModel.getCurrentCell().updateNumber("delete");
+                        mathDokuModel.getCurrentCell().updateNumber("delete", true);
                     } else {
                         try {
                             // Make sure it is an integer
                             Integer.parseInt(arg0.getText());
-                            mathDokuModel.getCurrentCell().updateNumber(arg0.getText());
+                            mathDokuModel.getCurrentCell().updateNumber(arg0.getText(), true);
                         } catch (NumberFormatException e) {
                             // Someone tried to type something that isn't a number or delete, ignore it
                         }
