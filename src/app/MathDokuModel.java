@@ -852,7 +852,6 @@ public class MathDokuModel {
                 // options exhausted before this cell could do anything, so the error is higher up.
 
                 System.out.println("Child has no prospects, go back once.");
-                cell.setPossibleSolutionNumber(0);
                 return false;
             }
             
@@ -878,8 +877,9 @@ public class MathDokuModel {
 
         boolean success = false;
         
-        
+        /*
         if (checkMathsSolutions()){
+            */
             if (i < gridDimensions - 1){
                 success = solveRecursively(i+1, j);
             } else if (j < gridDimensions - 1){
@@ -889,14 +889,14 @@ public class MathDokuModel {
                 //to get to this point all sodoku rules should have been followed
                 success = checkSolutions();// && checkMathsSolutions();
             }
-            
+            /*
         }
-        
+        */
 
         if (!success && cell.getFinalSolutionNumber() != 0){
             //has only one possible value so error is before this
             //this shouldnt have changed any values because that has already been done at the beginning
-            cell.setPossibleSolutionNumber(0);
+
             return false;
 
         } else if (!success && !cell.getPossibleSolutionList().isEmpty()){
@@ -905,24 +905,18 @@ public class MathDokuModel {
             System.out.println("Disappointed parent, try to make more children.");
             //try to restore unused option to other cells in the same row/column.
 
-            //TODO: restore child if they are below and before you
+            
             //No sex with parents, only restore cells in front and below.
             for (int k = 0; k < gridDimensions; k++) {
                 if (k > j){
                     //column.
-                    //grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
-                    //restore the childrens values as much as you can.
-                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
-                        grid[i][k].getPossibleSolutionList().add(k2, i+j*gridDimensions);
-                    }
+                    grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[i][k].setPossibleSolutionNumber(0);
                 }
                 if (k > i){
                     //row.
-                    //grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
-                    //restore the childrens values as much as you can.
-                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
-                        grid[k][j].getPossibleSolutionList().add(k2, i+j*gridDimensions);
-                    }
+                    grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[k][j].setPossibleSolutionNumber(0);
                 }
             }
             
@@ -941,26 +935,15 @@ public class MathDokuModel {
             for (int k = 0; k < gridDimensions; k++) {
                 if (k > j){
                     //column.
-                    //grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
-                    //restore the childrens values as much as you can.
-                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
-                        grid[i][k].getPossibleSolutionList().add(k2, i+j*gridDimensions);
-                    }
+                    grid[i][k].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[i][k].setPossibleSolutionNumber(0);
                 }
                 if (k > i){
                     //row.
-                    //grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
-                    //restore the childrens values as much as you can.
-                    for (int k2 = 1; k2 < gridDimensions+1; k2++) {
-                        grid[k][j].getPossibleSolutionList().add(k2, i+j*gridDimensions);
-                    }
+                    grid[k][j].getPossibleSolutionList().add((Integer)cell.getPossibleSolutionNumber(), i+j*gridDimensions);
+                    //grid[k][j].setPossibleSolutionNumber(0);
                 }
-                //restore your own values as much as you can.
-                cell.getPossibleSolutionList().add(k, i+j*gridDimensions);
             }
-
-            cell.setPossibleSolutionNumber(0);
-            
 
             return false;
         }
